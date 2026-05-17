@@ -7,7 +7,10 @@ const ativarLoading = () => {
 };
 
 const desativarLoading = () => {
+  console.log("oi");
+
   mostraLoading.value = false;
+  console.log("aqui");
 };
 
 export const useLoading = () => {

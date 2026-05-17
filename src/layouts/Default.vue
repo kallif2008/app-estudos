@@ -1,29 +1,28 @@
 <template>
-  <div class="">
+  <div>
     <div
-      class="fixed bg-[#020617] p-2 flex items-center justify-between w-full h-16 top-0 left-0 z-30"
+      class="fixed top-0 left-0 w-full h-16 z-30 backdrop-blur-xl bg-[#01051F] border-b border-cyan-500/10 px-6 flex justify-between items-center"
     >
-      <div class="flex flex-row items-center gap-3">
-        <img src="/memora-logo.png" alt="Memora" class="w-40 sm:w-28" />
+      <div class="flex items-center gap-4">
+        <img src="/memora-logo.png" class="w-40 sm:w-28" />
 
         <button
-          class="text-white font-medium text-lg"
+          class="text-slate-300 hover:text-cyan-300 transition"
           @click="router.push('/temas')"
         >
-          Pagina Inicial
+          Página inicial
         </button>
       </div>
 
-      <button @click="limparSessao()">
-        <svg-icon
-          type="mdi"
-          :path="mdiLogout"
-          class="text-white w-6 h-6 cursor-pointer"
-        ></svg-icon>
+      <button
+        @click="limparSessao()"
+        class="text-slate-300 hover:text-red-400 transition"
+      >
+        <svg-icon type="mdi" :path="mdiLogout" class="w-6 h-6" />
       </button>
     </div>
 
-    <div class="w-full h-full flex items-center justify-center mt-10">
+    <div class="pt-16">
       <router-view />
     </div>
   </div>

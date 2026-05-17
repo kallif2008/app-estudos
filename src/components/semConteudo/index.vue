@@ -1,23 +1,23 @@
 <template>
-  <div class="flex flex-col items-center justify-center sm:text-center">
-    <div class="w-full">
-      <Vue3Lottie :animationData="NaoEncontradoJSON" :height="200" />
-    </div>
-    <h1 class="text-xl font-bold text-slate-800">
+  <div
+    class="rounded-3xl bg-[#081121]/80 backdrop-blur-lg border border-cyan-500/20 p-8 max-w-lg mx-auto flex flex-col items-center text-center"
+  >
+    <Vue3Lottie :animationData="NaoEncontradoJSON" :height="220" />
+
+    <h1 class="text-2xl font-bold text-white">
       {{ titulo }}
     </h1>
-    <span class="text-slate-600 mb-6 break-words">
+
+    <p class="text-slate-400 mt-2 mb-6">
       {{ texto }}
-    </span>
+    </p>
 
-    <div class="flex flex-col gap-2 w-full">
-      <Button v-if="mostrarBotao" @click="() => fn()"> {{ label }} </Button>
+    <div class="w-full flex flex-col gap-3">
+      <Button v-if="mostrarBotao" @click="fn">
+        {{ label }}
+      </Button>
 
-      <Button
-        v-if="mostrarVoltar"
-        variant="outline"
-        @click="() => router.back()"
-      >
+      <Button v-if="mostrarVoltar" variant="outline" @click="router.back()">
         Voltar
       </Button>
     </div>

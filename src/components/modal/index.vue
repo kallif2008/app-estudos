@@ -2,46 +2,85 @@
   <transition name="fade">
     <div
       v-if="abrirModal"
-      class="fixed z-20 bg-black/50 flex items-center justify-center w-full h-screen top-0 sm:px-2"
+      class="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/60 backdrop-blur-md"
     >
+      <!-- brilho fundo -->
       <div
-        class="flex flex-col gap-2 bg-white w-1/2 rounded-md p-4 overflow-auto sm:w-full"
+        class="absolute w-[300px] h-[300px] bg-cyan-500/10 rounded-full blur-[120px] top-1/4 left-1/3"
+      />
+
+      <!-- borda neon -->
+      <div
+        class="relative w-full max-w-2xl p-[2px] rounded-[28px] bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 shadow-[0_0_30px_rgba(34,211,238,.25)]"
       >
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-lg font-semibold">{{ titulo }}</h2>
-
-          <button
-            @click="emit('fecharModal')"
-            class="text-slate-400 hover:text-cyan-400 transition"
+        <!-- conteúdo -->
+        <div
+          class="rounded-[28px] bg-[#081121]/95 backdrop-blur-xl p-6 overflow-auto max-h-[85vh]"
+        >
+          <!-- header -->
+          <div
+            class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4"
           >
-            ✕
-          </button>
-        </div>
+            <div>
+              <h2 class="text-xl font-semibold text-white">
+                {{ titulo }}
+              </h2>
 
-        <form class="space-y-4" @submit.prevent="salvar">
-          <slot />
+              <p class="text-sm text-slate-400 mt-1">
+                Preencha as informações abaixo
+              </p>
+            </div>
 
-          <div class="flex justify-end gap-3 pt-4 sm:flex-col sm:items-stretch">
             <button
-              type="button"
               @click="emit('fecharModal')"
-              class="px-4 py-2 rounded-lg border border-slate-700 text-slate-300 hover:bg-slate-800 transition"
+              class="h-10 w-10 rounded-full flex items-center justify-center bg-slate-800/70 text-slate-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition"
             >
-              Fechar
-            </button>
-
-            <button
-              type="submit"
-              class="px-5 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-slate-900 font-semibold transition"
-            >
-              Salvar
+              ✕
             </button>
           </div>
-        </form>
+
+          <form class="space-y-5" @submit.prevent="salvar">
+            <slot />
+
+            <div
+              class="flex justify-end gap-3 pt-5 border-t border-slate-800 sm:flex-col"
+            >
+              <!-- cancelar -->
+              <button
+                type="button"
+                @click="emit('fecharModal')"
+                class="px-5 py-3 rounded-xl border border-cyan-500/20 text-slate-300 hover:bg-slate-800 transition"
+              >
+                Fechar
+              </button>
+
+              <!-- salvar -->
+              <button
+                type="submit"
+                class="px-6 py-3 rounded-xl font-semibold text-black bg-gradient-to-r from-cyan-400 to-fuchsia-500 hover:scale-[1.02] transition shadow-[0_0_25px_rgba(56,189,248,.35)]"
+              >
+                Salvar
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </transition>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.25s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+</style>
 
 <script setup lang="ts">
 import { type PropType } from "vue";

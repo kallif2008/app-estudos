@@ -13,118 +13,161 @@
     />
   </ModalTema>
 
-  <div
-    class="w-full min-h-screen h-full bg-slate-100 flex flex-col items-center py-10"
-  >
-    <div class="flex flex-col justify-center w-1/2 gap-3 sm:w-full sm:px-2">
-      <h1 class="text-2xl font-bold text-slate-800 mb-6">Seus estudos</h1>
+  <div class="relative min-h-screen overflow-hidden">
+    <!-- background -->
+    <img
+      src="/fundoLogin.png"
+      class="absolute inset-0 w-full h-full object-cover"
+    />
 
-      <div class="flex flex-row items-center gap-2">
-        <Button
-          variant="outline"
-          v-for="(item, index) in filtroEstudo"
-          :key="index"
+    <div class="absolute inset-0 bg-[#020617]/75" />
+
+    <div class="relative z-10 max-w-5xl mx-auto px-6 py-10">
+      <!-- topo -->
+      <div class="flex sm:flex-col justify-between gap-4 mb-8">
+        <div>
+          <h1 class="text-3xl font-bold text-white">Seus estudos</h1>
+
+          <p class="text-slate-400 mt-1">Organize sua evolução</p>
+        </div>
+
+        <div class="flex gap-2">
+          <button
+            @click="toggleModal('criar')"
+            class="px-5 rounded-xl font-medium bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-black shadow-[0_0_20px_rgba(34,211,238,.3)] hover:scale-105 transition"
+          >
+            + Novo estudo
+          </button>
+
+          <button
+            @click="router.back()"
+            class="px-5 rounded-xl border border-cyan-500/20 text-slate-300 hover:bg-slate-800 transition"
+          >
+            Voltar
+          </button>
+        </div>
+      </div>
+
+      <!-- filtros -->
+      <div class="flex flex-wrap gap-3 mb-6">
+        <button
+          v-for="item in filtroEstudo"
+          :key="item.id"
           @click="
             () => {
               idBtnStatusEstudo = item.id;
               buscarEstudos(item.value);
             }
           "
-          :class="
-            idBtnStatusEstudo === item.id ? '!bg-cyan-500 !text-slate-900' : ''
-          "
+          :class="[
+            'px-4 py-2 rounded-xl transition',
+            idBtnStatusEstudo === item.id
+              ? 'bg-cyan-500 text-black shadow-[0_0_15px_rgba(34,211,238,.3)]'
+              : 'bg-[#081121]/90 text-slate-400 hover:bg-slate-800',
+          ]"
         >
           {{ item.label }}
-        </Button>
+        </button>
       </div>
 
       <SemConteudo
         v-if="dataEstudos.length === 0"
         :fn="() => toggleModal('criar')"
         label="Criar novo estudo"
-        texto="Crie um novo estudo para começar a adicionar seus conteúdos."
-        titulo="Nenhum estudo encontrado!"
+        texto="Crie um estudo para começar"
+        titulo="Nenhum estudo encontrado"
         :mostrarBotao="false"
       />
 
-      <div class="flex flex-col gap-4 w-full">
+      <!-- cards -->
+      <div class="grid gap-4">
         <div
           v-for="estudo in dataEstudos"
-          :key="estudo.idTema"
-          class="bg-white p-4 rounded-lg shadow-md w-full flex flex-col items-start justify-between"
+          :key="estudo._id"
+          class="rounded-2xl p-[2px] bg-gradient-to-r from-cyan-500/50 to-fuchsia-500/50"
         >
-          <div class="flex flex-row justify-between w-full">
-            <h2 class="text-lg font-semibold text-slate-900">
-              {{ estudo.titulo }}
-            </h2>
+          <div class="rounded-2xl bg-[#081121]/90 backdrop-blur-lg p-5">
+            <!-- topo card -->
 
-            <div class="flex flex-row items-end gap-2">
-              <button
-                @click="
-                  router.push(
-                    `/temas/${idTemaAtual}/estudos/${estudo._id}/conteudo`,
-                  )
-                "
-              >
-                <svg-icon
-                  type="mdi"
-                  :path="mdiMagnify"
-                  class="text-slate-500 w-6 h-6 cursor-pointer"
-                ></svg-icon>
-              </button>
-              <button
-                @click="
-                  () => {
-                    setarEstudo(estudo.titulo, estudo.descricao, estudo._id);
-                    toggleModal('editar');
-                  }
-                "
-              >
-                <svg-icon
-                  type="mdi"
-                  :path="mdiPencil"
-                  class="text-slate-500 w-6 h-6 cursor-pointer"
-                ></svg-icon>
-              </button>
-              <button @click="deletarEstudo(estudo._id)">
-                <svg-icon
-                  type="mdi"
-                  :path="mdiTrashCanOutline"
-                  class="text-slate-500 w-6 h-6 cursor-pointer"
-                ></svg-icon>
-              </button>
-            </div>
-          </div>
+            <div class="flex justify-between items-start">
+              <div>
+                <h2 class="text-lg font-semibold text-white">
+                  {{ estudo.titulo }}
+                </h2>
 
-          <span class="text-slate-600 mt-1">{{ estudo.descricao }}</span>
+                <p class="text-slate-400 mt-1">
+                  {{ estudo.descricao }}
+                </p>
+              </div>
 
-          <div
-            class="flex flex-row sm:flex-col justify-between w-full mt-2 sm:gap-2"
-          >
-            <div class="flex flex-row items-center gap-2">
-              <span class="text-slate-600">Status: </span>
-              <Badge
-                :status="
-                  estudo.status == 'estudando'
-                    ? 'info'
-                    : estudo.status == 'revisao'
-                      ? 'warn'
-                      : 'success'
-                "
-                >{{
-                  estudo.status == "estudando"
-                    ? "Estudando"
-                    : estudo.status == "revisao"
-                      ? "Revisão"
-                      : "Concluídos"
-                }}</Badge
-              >
+              <div class="flex gap-2">
+                <button
+                  class="action-button"
+                  @click="
+                    router.push(
+                      `/temas/${idTemaAtual}/estudos/${estudo._id}/conteudo`,
+                    )
+                  "
+                >
+                  <svg-icon type="mdi" :path="mdiMagnify" class="w-5 h-5" />
+                </button>
+
+                <button
+                  class="action-button"
+                  @click="
+                    () => {
+                      setarEstudo(estudo.titulo, estudo.descricao, estudo._id);
+
+                      toggleModal('editar');
+                    }
+                  "
+                >
+                  <svg-icon type="mdi" :path="mdiPencil" class="w-5 h-5" />
+                </button>
+
+                <button
+                  class="action-button hover:text-red-400"
+                  @click="deletarEstudo(estudo._id)"
+                >
+                  <svg-icon
+                    type="mdi"
+                    :path="mdiTrashCanOutline"
+                    class="w-5 h-5"
+                  />
+                </button>
+              </div>
             </div>
 
-            <Button
-              class="!w-auto p-2"
-              @click="
-                () => {
+            <!-- footer -->
+
+            <div
+              class="mt-5 pt-4 border-t border-slate-800 flex sm:flex-col gap-4 justify-between"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-slate-400"> Status: </span>
+
+                <Badge
+                  :status="
+                    estudo.status === 'estudando'
+                      ? 'info'
+                      : estudo.status === 'revisao'
+                        ? 'warn'
+                        : 'success'
+                  "
+                >
+                  {{
+                    estudo.status === "estudando"
+                      ? "Estudando"
+                      : estudo.status === "revisao"
+                        ? "Revisão"
+                        : "Concluído"
+                  }}
+                </Badge>
+              </div>
+
+              <button
+                class="px-4 py-2 rounded-xl text-sm bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 transition"
+                @click="
                   atualizarStatusEstudo(
                     estudo._id,
                     estudo.status === 'estudando'
@@ -132,38 +175,41 @@
                       : estudo.status === 'revisao'
                         ? 'concluidos'
                         : 'estudando',
-                  );
-                }
-              "
-            >
-              Mudar para
-              {{
-                estudo.status === "estudando"
-                  ? "revisão"
-                  : estudo.status === "revisao"
-                    ? "Concluídos"
-                    : "Estudando"
-              }}
-            </Button>
+                  )
+                "
+              >
+                Mudar para
+                {{
+                  estudo.status === "estudando"
+                    ? "Revisão"
+                    : estudo.status === "revisao"
+                      ? "Concluídos"
+                      : "Estudando"
+                }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="mt-6 flex flex-col items-center gap-2">
-        <Button
-          @click="
-            () => {
-              toggleModal('criar');
-            }
-          "
-        >
-          Criar novo estudo
-        </Button>
-
-        <Button variant="outline" @click="() => router.back()">Voltar</Button>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.action-button {
+  @apply h-10
+w-10
+rounded-full
+bg-slate-800/60
+text-slate-300
+flex
+items-center
+justify-center
+hover:bg-cyan-500/20
+hover:text-cyan-300
+transition;
+}
+</style>
 
 <route lang="json">
 {

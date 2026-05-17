@@ -10,74 +10,97 @@
     />
   </ModalEstudos>
 
-  <div
-    class="w-full min-h-screen h-full bg-slate-100 flex flex-col items-center py-10"
-  >
-    <SemConteudo
-      v-if="dataTemas.length === 0"
-      :fn="() => toggleModal('criar')"
-      label="Criar novo tema"
-      texto="Crie um novo tema para começar a adicionar seus estudos."
-      titulo="Nenhum tema encontrado!"
+  <div class="relative min-h-screen overflow-hidden w-full">
+    <!-- background -->
+    <img
+      src="/fundoLogin.png"
+      class="absolute inset-0 w-full h-full object-cover"
     />
 
-    <div v-else class="flex flex-col justify-center w-1/2 sm:w-full sm:px-2">
-      <h1 class="text-2xl font-bold text-slate-800 mb-6">Seus temas</h1>
-      <div class="flex flex-col gap-4 w-full">
-        <div
-          v-for="tema in dataTemas"
-          :key="tema._id"
-          class="bg-white p-4 rounded-lg shadow-md w-full flex items-start justify-between"
-        >
-          <div class="flex flex-col">
-            <h2 class="text-lg font-semibold text-slate-900">
-              {{ tema.titulo }}
-            </h2>
-            <span class="text-slate-600">{{ tema.descricao }}</span>
+    <div class="absolute inset-0 bg-[#020617]/70"></div>
+
+    <div class="relative z-10 px-6 py-10 max-w-5xl mx-auto">
+      <SemConteudo
+        v-if="dataTemas.length === 0"
+        :fn="() => toggleModal('criar')"
+        label="Criar novo tema"
+        texto="Crie um novo tema para começar seus estudos."
+        titulo="Nenhum tema encontrado"
+      />
+
+      <template v-else>
+        <div class="mb-8 flex justify-between items-center">
+          <div>
+            <h1 class="text-3xl font-bold text-white">Seus temas</h1>
+
+            <p class="text-slate-400 mt-1">Organize seus estudos</p>
           </div>
 
-          <div class="flex flex-row items-end gap-2">
-            <button @click="router.push(`/temas/${tema._id}/estudos`)">
-              <svg-icon
-                type="mdi"
-                :path="mdiMagnify"
-                class="text-slate-500 w-6 h-6 cursor-pointer"
-              ></svg-icon>
-            </button>
-            <button
-              @click="
-                toggleModal('editar');
-                setarTema(tema.titulo, tema.descricao, tema._id);
-              "
+          <button
+            @click="
+              () => {
+                toggleModal('criar');
+                setarEstadoInicial();
+              }
+            "
+            class="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-black font-semibold shadow-[0_0_20px_rgba(34,211,238,.35)] hover:scale-105 transition"
+          >
+            + Novo tema
+          </button>
+        </div>
+
+        <div class="grid gap-4">
+          <div
+            v-for="tema in dataTemas"
+            :key="tema._id"
+            class="p-[2px] rounded-2xl bg-gradient-to-r from-cyan-500/50 to-fuchsia-500/50"
+          >
+            <div
+              class="rounded-2xl bg-[#081121]/90 backdrop-blur-lg p-5 flex justify-between items-center transition hover:translate-y-[-2px] hover:shadow-[0_0_30px_rgba(34,211,238,.15)]"
             >
-              <svg-icon
-                type="mdi"
-                :path="mdiPencil"
-                class="text-slate-500 w-6 h-6 cursor-pointer"
-              ></svg-icon>
-            </button>
-            <button @click="deletarTema(tema._id)">
-              <svg-icon
-                type="mdi"
-                :path="mdiTrashCanOutline"
-                class="text-slate-500 w-6 h-6 cursor-pointer"
-              ></svg-icon>
-            </button>
+              <div>
+                <h2 class="text-white font-semibold text-lg">
+                  {{ tema.titulo }}
+                </h2>
+
+                <p class="text-slate-400 mt-1">
+                  {{ tema.descricao }}
+                </p>
+              </div>
+
+              <div class="flex gap-2">
+                <button
+                  @click="router.push(`/temas/${tema._id}/estudos`)"
+                  class="action-button"
+                >
+                  <svg-icon type="mdi" :path="mdiMagnify" class="w-5 h-5" />
+                </button>
+
+                <button
+                  @click="
+                    toggleModal('editar');
+                    setarTema(tema.titulo, tema.descricao, tema._id);
+                  "
+                  class="action-button"
+                >
+                  <svg-icon type="mdi" :path="mdiPencil" class="w-5 h-5" />
+                </button>
+
+                <button
+                  @click="deletarTema(tema._id)"
+                  class="action-button hover:text-red-400"
+                >
+                  <svg-icon
+                    type="mdi"
+                    :path="mdiTrashCanOutline"
+                    class="w-5 h-5"
+                  />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="mt-6">
-        <Button
-          @click="
-            () => {
-              toggleModal('criar');
-              setarEstadoInicial();
-            }
-          "
-        >
-          Criar novo tema
-        </Button>
-      </div>
+      </template>
     </div>
   </div>
 </template>
@@ -116,4 +139,18 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.action-button {
+  @apply h-10
+  w-10
+  rounded-full
+  bg-slate-800/60
+  text-slate-300
+  flex
+  items-center
+  justify-center
+  hover:bg-cyan-500/20
+  hover:text-cyan-300
+  transition;
+}
+</style>

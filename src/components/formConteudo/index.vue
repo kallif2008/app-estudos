@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col gap-2">
-    <h2 class="text-slate-900 text-xl font-semibold mb-4">{{ titulo }}</h2>
+    <h2 class="text-white text-xl font-semibold">{{ titulo }}</h2>
 
     <div class="flex flex-col gap-4">
       <Input
