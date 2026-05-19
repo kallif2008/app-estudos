@@ -165,7 +165,7 @@
                       </button>
                     </template>
                   </ce-tooltip>
-                  <ce-tooltip location="top" text="/ouvir frase">
+                  <ce-tooltip location="top" text="Ouvir frase">
                     <template #activator>
                       <button
                         class="action-button"
