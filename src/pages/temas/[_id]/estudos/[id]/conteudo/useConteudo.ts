@@ -1,8 +1,8 @@
-import { ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRespostaApi } from "@/utils/manipularRespotasApi";
 import { useModal } from "@/components/modal/useModal";
 import { useLoading } from "@/components/loading/useLoading";
-import type { IFrases, IRespostaFrases } from "./interfaces";
+import type { AnaliseFraseIA, IFrases, IRespostaFrases } from "./interfaces";
 import type { AxiosResponse } from "node_modules/axios/index.d.cts";
 
 const { ativarLoading, desativarLoading } = useLoading();
@@ -28,6 +28,57 @@ const audioUrl = ref<string | null>(null);
 const audioLoading = ref(false);
 const abrirModalEditarAudio = ref(false);
 const idioma = ref<"pt" | "en">("pt");
+const indiceAtual = ref(0);
+const abrirModalVisualizarTextoCompleto = ref(false);
+const consultandoIA = ref(false);
+const textoDigitacaoIA = ref("");
+const isDigitandoIA = ref(false);
+const respostasIA = ref<Record<string, string>>({});
+
+const iniciarDigitacaoIA = (texto: string, fraseId: string) => {
+  textoDigitacaoIA.value = "";
+  isDigitandoIA.value = true;
+  let charIndex = 0;
+
+  const digitar = () => {
+    if (charIndex < texto.length) {
+      textoDigitacaoIA.value += texto[charIndex];
+      charIndex++;
+      setTimeout(digitar, 20);
+    } else {
+      isDigitandoIA.value = false;
+      respostasIA.value[fraseId] = texto;
+    }
+  };
+
+  digitar();
+};
+
+function formatarRespostaIA(data: AnaliseFraseIA): string {
+  let texto = `Traducao: ${data.traducao}\n\n`;
+  texto += `Uso nativo: ${data.usoNativo}\n\n`;
+
+  if (data.gramatica.length) {
+    texto += `Gramatica:\n`;
+    data.gramatica.forEach((g) => (texto += `  - ${g}\n`));
+    texto += `\n`;
+  }
+
+  if (data.exemplos.length) {
+    texto += `Exemplos:\n`;
+    data.exemplos.forEach((ex) => {
+      texto += `  - ${ex.english}\n    => ${ex.portuguese}\n`;
+    });
+    texto += `\n`;
+  }
+
+  if (data.observacoes.length) {
+    texto += `Observacoes:\n`;
+    data.observacoes.forEach((o) => (texto += `  - ${o}\n`));
+  }
+
+  return texto;
+}
 
 const setarInfoParaEditarConteudo = (item: IFrases) => {
   idConteudoAtual.value = item._id;
@@ -121,6 +172,35 @@ function formatarDialogo(texto: string) {
   return resultado.join("\n");
 }
 
+const fraseAtual = computed(() => {
+  return dataFrases.value.frases[indiceAtual.value];
+});
+
+const proximoCard = () => {
+  if (indiceAtual.value < dataFrases.value.frases.length - 1) {
+    indiceAtual.value++;
+  }
+};
+
+const cardAnterior = () => {
+  if (indiceAtual.value > 0) {
+    indiceAtual.value--;
+  }
+};
+
+watch(fraseAtual, (novaFrase) => {
+  if (!novaFrase) {
+    textoDigitacaoIA.value = "";
+    return;
+  }
+  if (respostasIA.value[novaFrase._id]) {
+    textoDigitacaoIA.value = respostasIA.value[novaFrase._id] ?? "";
+    isDigitandoIA.value = false;
+  } else {
+    textoDigitacaoIA.value = "";
+  }
+});
+
 export const useConteudo = () => {
   return {
     dataFrases,
@@ -132,12 +212,23 @@ export const useConteudo = () => {
     audioLoading,
     abrirModalEditarAudio,
     idioma,
+    indiceAtual,
+    fraseAtual,
+    abrirModalVisualizarTextoCompleto,
+    consultandoIA,
+    textoDigitacaoIA,
+    isDigitandoIA,
+    respostasIA,
     setarInfoParaEditarConteudo,
     formatarDialogo,
+    formatarRespostaIA,
+    iniciarDigitacaoIA,
     criarConteudo,
     selecionarAudio,
     obterConteudo,
     toggleModal,
     manipularRespostaCriacaoConteudo,
+    proximoCard,
+    cardAnterior,
   };
 };

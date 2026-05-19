@@ -46,35 +46,61 @@ export default defineConfig({
 
       manifest: {
         name: "Memora",
-        short_name: "memora",
-        description: "Aplicativo para estudo e memorização",
-        theme_color: "#020617",
+        short_name: "Memora",
+        description: "Aprenda melhor. Lembre por mais tempo.",
+
+        theme_color: "#081121",
+        background_color: "#020617",
+
+        display: "standalone",
+        orientation: "portrait",
+
         icons: [
           {
-            src: "memoraFundo.jpg",
+            src: "/pwa-192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "/pwa-512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "any maskable",
+            purpose: "any",
+          },
+          {
+            src: "/maskable-icon.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
           },
         ],
       },
 
       workbox: {
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+
         runtimeCaching: [
           {
             urlPattern: ({ url, request }) => {
               const isApiRequest = /\/api\/.*\/*.json/.test(url.pathname);
+
               const isTargetMethod = ["POST", "PUT", "DELETE"].includes(
-                request.method
+                request.method,
               );
+
               return isApiRequest && isTargetMethod;
             },
+
             handler: "NetworkOnly",
+
             options: {
               backgroundSync: {
-                name: "myQueueName",
+                name: "memora-sync",
                 options: {
-                  maxRetentionTime: 24 * 60, // 24 horas
+                  maxRetentionTime: 24 * 60,
                 },
               },
             },

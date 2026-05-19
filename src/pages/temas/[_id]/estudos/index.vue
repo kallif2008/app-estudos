@@ -230,7 +230,6 @@ import { useEstudos } from "./useEstudos";
 import { useApiEstudos } from "./useApiEstudos";
 import { useRoute } from "vue-router";
 import { useModal } from "@/components/modal/useModal";
-import Button from "@/components/botao/index.vue";
 ///@ts-ignore
 import SvgIcon from "@jamescoyle/vue-icon";
 import { mdiMagnify, mdiPencil, mdiTrashCanOutline } from "@mdi/js";

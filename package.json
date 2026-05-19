@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@comercti/vue-components-hmg": "^0.24.7",
+    "@comercti/vue-components": "^0.41.0",
     "@jamescoyle/vue-icon": "^0.1.2",
     "@mdi/js": "^7.4.47",
     "@meersagor/wavesurfer-vue": "^2.0.0",

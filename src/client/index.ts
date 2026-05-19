@@ -25,6 +25,7 @@ const isRotaIgnorada = (url?: string): boolean => {
     /^\/texto\/[^/]+$/,
     /^\/frases\/[^/]+$/,
     /^\/audios\/[^/]+$/,
+    /^\/ia\/analisar-frase$/,
   ];
 
   return rotasIgnoradas.some((regex) => regex.test(pathname));
@@ -60,7 +61,7 @@ api.interceptors.response.use(
     if (!ignorarLoading) desativarLoading();
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export const useClient = api;

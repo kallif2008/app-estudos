@@ -117,7 +117,6 @@
 
 <script setup lang="ts">
 import Input from "@/components//input/index.vue";
-import Button from "@/components/botao/index.vue";
 import { useLogin } from "./useLogin";
 import { useApiLogin } from "./useApiLogin";
 

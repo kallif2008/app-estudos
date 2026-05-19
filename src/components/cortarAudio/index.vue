@@ -71,7 +71,7 @@
 import { ref, watch } from "vue";
 import Input from "@/components/input/index.vue";
 import Button from "@/components/botao/index.vue";
-import { CeSlider } from "@comercti/vue-components-hmg";
+import { CeSlider } from "@comercti/vue-components";
 
 const emit = defineEmits<{
   (e: "cortado", file: File): void;

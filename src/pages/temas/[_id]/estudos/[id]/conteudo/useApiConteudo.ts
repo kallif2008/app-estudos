@@ -2,6 +2,7 @@ import { useClient } from "@/client";
 import { useConteudo } from "./useConteudo";
 import type { AxiosResponse } from "axios";
 import { useLoading } from "@/components/loading/useLoading";
+import type { AnaliseFraseIA } from "./interfaces";
 
 export const useApiConteudo = () => {
   const {
@@ -9,7 +10,11 @@ export const useApiConteudo = () => {
     conteudo,
     idConteudoAtual,
     idioma,
+    consultandoIA,
     manipularRespostaCriacaoConteudo,
+    iniciarDigitacaoIA,
+    formatarRespostaIA,
+    fraseAtual,
   } = useConteudo();
 
   const { ativarLoading, desativarLoading } = useLoading();
@@ -74,6 +79,21 @@ export const useApiConteudo = () => {
     }
   };
 
+  const obterExplicacaoIA = async (frase: string) => {
+    try {
+      consultandoIA.value = true;
+      const response: AxiosResponse<AnaliseFraseIA> = await useClient.post(
+        "/ia/analisar-frase",
+        { frase },
+      );
+
+      const texto = formatarRespostaIA(response.data);
+      iniciarDigitacaoIA(texto, fraseAtual.value?._id || "");
+    } finally {
+      consultandoIA.value = false;
+    }
+  };
+
   const criarFrase = async (): Promise<AxiosResponse> => {
     const formData = new FormData();
 
@@ -109,5 +129,6 @@ export const useApiConteudo = () => {
     obterFrases,
     carregarAudio,
     atualizarAudio,
+    obterExplicacaoIA,
   };
 };

@@ -27,7 +27,7 @@
               </h2>
 
               <p class="text-sm text-slate-400 mt-1">
-                Preencha as informações abaixo
+                {{ subtitulo }}
               </p>
             </div>
 
@@ -56,6 +56,7 @@
 
               <!-- salvar -->
               <button
+                v-if="salvar"
                 type="submit"
                 class="px-6 py-3 rounded-xl font-semibold text-black bg-gradient-to-r from-cyan-400 to-fuchsia-500 hover:scale-[1.02] transition shadow-[0_0_25px_rgba(56,189,248,.35)]"
               >
@@ -92,11 +93,16 @@ const props = defineProps({
   },
   salvar: {
     type: Function as PropType<() => void>,
-    required: true,
+    required: false,
   },
   titulo: {
     type: String,
     required: false,
+  },
+  subtitulo: {
+    type: String,
+    required: false,
+    default: "Preencha as informações abaixo",
   },
 });
 

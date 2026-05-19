@@ -118,7 +118,6 @@
 <script setup lang="ts">
 import ModalEstudos from "@/components/modal/index.vue";
 import { useTemas } from "./useTemas";
-import Button from "@/components/botao/index.vue";
 import FormConteudo from "@/components/formConteudo/index.vue";
 import { onMounted } from "vue";
 import { useApiTemas } from "./useApiTemas";
