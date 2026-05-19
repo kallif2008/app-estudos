@@ -139,7 +139,7 @@
           >
             <div class="flex flex-col items-start">
               <div class="flex justify-between mb-8">
-                <div class="flex gap-2">
+                <div class="flex gap-2 sm:flex-wrap">
                   <ce-tooltip location="top" text="Traduzir frase">
                     <template #activator>
                       <button

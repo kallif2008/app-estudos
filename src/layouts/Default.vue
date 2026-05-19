@@ -4,7 +4,7 @@
       class="fixed top-0 left-0 w-full h-16 z-30 backdrop-blur-xl bg-[#01051F] border-b border-cyan-500/10 px-6 flex justify-between items-center"
     >
       <div class="flex items-center gap-4">
-        <img src="/memora-fundo.png" class="w-10 sm:w-28" />
+        <img src="/memora-fundo.png" class="w-10" />
 
         <button
           class="text-slate-300 hover:text-cyan-300 transition"
