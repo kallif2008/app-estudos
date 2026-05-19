@@ -19,7 +19,7 @@
       <div class="rounded-[30px] bg-[#081121]/85 backdrop-blur-xl px-8 py-10">
         <!-- Logo -->
         <div class="flex flex-col items-center mb-8">
-          <img src="/memora-logo.png" alt="Memora" class="w-48 mb-3" />
+          <img src="/logo.png" alt="Memora" class="w-48 mb-3" />
 
           <p class="text-slate-300 text-sm">
             Aprenda melhor. Lembre por mais tempo.
