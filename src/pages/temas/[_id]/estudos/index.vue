@@ -235,6 +235,7 @@ import SvgIcon from "@jamescoyle/vue-icon";
 import { mdiMagnify, mdiPencil, mdiTrashCanOutline } from "@mdi/js";
 import { useRouter } from "vue-router";
 import Badge from "@/components/badge/index.vue";
+import { useConteudo } from "./[id]/conteudo/useConteudo";
 
 defineProps<{
   _id: string;
@@ -260,10 +261,13 @@ const {
   atualizarStatusEstudo,
 } = useApiEstudos();
 
+const { statusEstudo } = useConteudo();
+
 onMounted(async () => {
   idBtnStatusEstudo.value = 1;
   const route = useRoute();
   idTemaAtual.value = route.params._id as string;
+  statusEstudo.value = null;
   await buscarEstudos();
 });
 </script>

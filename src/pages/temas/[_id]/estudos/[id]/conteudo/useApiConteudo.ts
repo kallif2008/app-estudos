@@ -11,6 +11,7 @@ export const useApiConteudo = () => {
     idConteudoAtual,
     idioma,
     consultandoIA,
+    statusEstudo,
     manipularRespostaCriacaoConteudo,
     iniciarDigitacaoIA,
     formatarRespostaIA,
@@ -26,6 +27,19 @@ export const useApiConteudo = () => {
       return response.data;
     } finally {
       desativarLoading();
+    }
+  };
+
+  const obterStatusEstudo = async () => {
+    try {
+      const response = await useClient.get(`/status/${idEstudoAtual.value}`);
+
+      statusEstudo.value = response.data.status;
+
+      console.log("s", statusEstudo.value);
+    } catch (error) {
+      console.log("Erro ao obter status do estudo:", error);
+      return null;
     }
   };
 
@@ -130,5 +144,6 @@ export const useApiConteudo = () => {
     carregarAudio,
     atualizarAudio,
     obterExplicacaoIA,
+    obterStatusEstudo,
   };
 };

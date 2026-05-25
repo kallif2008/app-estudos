@@ -34,6 +34,7 @@ const consultandoIA = ref(false);
 const textoDigitacaoIA = ref("");
 const isDigitandoIA = ref(false);
 const respostasIA = ref<Record<string, string>>({});
+const statusEstudo = ref<string | null>("");
 
 const iniciarDigitacaoIA = (texto: string, fraseId: string) => {
   textoDigitacaoIA.value = "";
@@ -230,5 +231,6 @@ export const useConteudo = () => {
     manipularRespostaCriacaoConteudo,
     proximoCard,
     cardAnterior,
+    statusEstudo,
   };
 };

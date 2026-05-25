@@ -99,8 +99,24 @@
         v-if="dataFrases.frases.length === 0"
         :fn="() => toggleModal('criar')"
         label="Criar conteúdo"
-        texto="Adicione conteúdos para começar."
-        titulo="Nenhum conteúdo encontrado"
+        :texto="
+          !statusEstudo
+            ? 'Adicione conteúdos para começar.'
+            : statusEstudo === 'pendente'
+              ? 'Estudo aguardando para ser criado'
+              : statusEstudo === 'processando'
+                ? 'A criação do estudo está em andamento'
+                : 'Estudo concluído'
+        "
+        :titulo="
+          !statusEstudo
+            ? 'Nenhum conteúdo encontrado'
+            : statusEstudo === 'pendente'
+              ? 'Estudo pendente'
+              : statusEstudo === 'processando'
+                ? 'Estudo em processamento'
+                : 'Estudo concluído'
+        "
         :mostrarVoltar="true"
       />
 
@@ -418,6 +434,7 @@ const {
   consultandoIA,
   textoDigitacaoIA,
   isDigitandoIA,
+  statusEstudo,
   criarConteudo,
   obterConteudo,
   toggleModal,
@@ -434,6 +451,7 @@ const {
   carregarAudio,
   deletarFrase,
   obterExplicacaoIA,
+  obterStatusEstudo,
 } = useApiConteudo();
 
 const { abrirModal } = useModal();
@@ -443,7 +461,7 @@ const { alternarChat } = useChatIA();
 onMounted(async () => {
   idEstudoAtual.value = route.params.id as string;
 
-  await obterConteudo(obterFrases);
+  await Promise.all([obterConteudo(obterFrases), obterStatusEstudo()]);
 });
 
 watch(
