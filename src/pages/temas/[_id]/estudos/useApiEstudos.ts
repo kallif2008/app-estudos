@@ -16,7 +16,7 @@ export const useApiEstudos = () => {
         params: {
           status,
         },
-      }
+      },
     );
 
     if (resposta.data.length > 0) {
@@ -25,15 +25,13 @@ export const useApiEstudos = () => {
       return;
     }
 
-    notificar("ERROR", 5000, "Não há dados para exibir");
     dataEstudos.value = [];
   };
 
   const criarEstudo = async () => {
     await useClient.post("/licoes", {
       idTema: idTemaAtual.value,
-      titulo: estudo.value.titulo,
-      descricao: estudo.value.descricao,
+      ...estudo.value,
     });
 
     await manipularRespostaCriacaoEstudo(buscarEstudos);
@@ -41,8 +39,7 @@ export const useApiEstudos = () => {
 
   const atualizarEstudo = async (idEstudo: string) => {
     await useClient.put(`/licoes/${idEstudo}`, {
-      titulo: estudo.value.titulo,
-      descricao: estudo.value.descricao,
+      ...estudo.value,
     });
 
     await manipularRespostaCriacaoEstudo(buscarEstudos);

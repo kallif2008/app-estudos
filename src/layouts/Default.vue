@@ -1,29 +1,25 @@
 <template>
   <div>
-    <div
-      class="fixed top-0 left-0 w-full h-16 z-30 backdrop-blur-xl bg-[#01051F] border-b border-cyan-500/10 px-6 flex justify-between items-center"
-    >
-      <div class="flex items-center gap-4">
-        <img src="/memora-fundo.png" class="w-10" />
+    <Sidebar />
 
+    <div>
+      <div
+        v-if="!isDesktop"
+        class="fixed top-0 left-0 right-0 z-30 h-16 flex backdrop-blur-xl bg-[#01051F] border-b border-cyan-500/10 px-6 items-center justify-between"
+      >
         <button
-          class="text-slate-300 hover:text-cyan-300 transition"
-          @click="router.push('/temas')"
+          @click="toggleSidebar"
+          class="text-slate-400 hover:text-white transition"
         >
-          Página inicial
+          <svg-icon type="mdi" :path="mdiMenu" class="w-6 h-6" />
         </button>
       </div>
 
-      <button
-        @click="limparSessao()"
-        class="text-slate-300 hover:text-red-400 transition"
-      >
-        <svg-icon type="mdi" :path="mdiLogout" class="w-6 h-6" />
-      </button>
-    </div>
+      <div v-else />
 
-    <div class="pt-16">
-      <router-view />
+      <div class="sm:pt-16 md:pt-16">
+        <router-view />
+      </div>
     </div>
   </div>
 </template>
@@ -31,10 +27,27 @@
 <script setup lang="ts">
 ///@ts-ignore
 import SvgIcon from "@jamescoyle/vue-icon";
-import { mdiLogout } from "@mdi/js";
-import { useRouter } from "vue-router";
-import { useSessao } from "@/utils/sessao";
+import { mdiMenu } from "@mdi/js";
+import { useSidebar } from "@/components/sidebar/useSidebar";
+import Sidebar from "@/components/sidebar/index.vue";
+import { ref, onMounted, onUnmounted } from "vue";
 
-const router = useRouter();
-const { limparSessao } = useSessao();
+const { toggleSidebar } = useSidebar();
+
+const isDesktop = ref(false);
+let mql: MediaQueryList | null = null;
+
+function handleChange(e: MediaQueryListEvent | MediaQueryList) {
+  isDesktop.value = e.matches;
+}
+
+onMounted(() => {
+  mql = window.matchMedia("(min-width: 1024px)");
+  handleChange(mql);
+  mql.addEventListener("change", handleChange);
+});
+
+onUnmounted(() => {
+  mql?.removeEventListener("change", handleChange);
+});
 </script>

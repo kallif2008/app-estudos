@@ -11,18 +11,26 @@ const dataFrases = ref<IRespostaFrases>({ frases: [], audioUrl: null });
 const idEstudoAtual = ref<string>("");
 const tipoAcao = ref<"criar" | "editar">("criar");
 const idConteudoAtual = ref<string>("");
+const audioComIa = ref<Record<number, string>>({});
+const queryParams = ref({
+  agenteId: "",
+  agenteIdExplicacao: "",
+  tradutor: false,
+});
 const conteudo = ref<{
-  frase: string;
+  frase: string | null;
   inicioAudio: number;
   fimAudio: number;
   audio: File | null;
-  traducao?: string;
+  traducao?: string | null;
+  videoUrl: string | null;
 }>({
-  frase: "",
+  frase: null,
   audio: null,
   inicioAudio: 0,
   fimAudio: 0,
-  traducao: "",
+  traducao: null,
+  videoUrl: null,
 });
 const audioUrl = ref<string | null>(null);
 const audioLoading = ref(false);
@@ -35,6 +43,15 @@ const textoDigitacaoIA = ref("");
 const isDigitandoIA = ref(false);
 const respostasIA = ref<Record<string, string>>({});
 const statusEstudo = ref<string | null>("");
+const personalizarEstudo = ref({
+  texto: false,
+  audio: false,
+  video: false,
+  extrairTextoAudio: false,
+  converterTextoFrases: false,
+  gerarComIA: false,
+  gerarAudioComIA: false,
+});
 
 const iniciarDigitacaoIA = (texto: string, fraseId: string) => {
   textoDigitacaoIA.value = "";
@@ -56,6 +73,8 @@ const iniciarDigitacaoIA = (texto: string, fraseId: string) => {
 };
 
 function formatarRespostaIA(data: AnaliseFraseIA): string {
+  if (!data || typeof data !== "object") return data;
+
   let texto = `Traducao: ${data.traducao}\n\n`;
   texto += `Uso nativo: ${data.usoNativo}\n\n`;
 
@@ -130,10 +149,11 @@ const manipularRespostaCriacaoConteudo = async (
   useRespostaApi(201);
 
   conteudo.value = {
-    frase: "",
+    frase: null,
     inicioAudio: 0,
     fimAudio: 0,
     audio: null,
+    videoUrl: null,
   };
 
   if (executarCallback) {
@@ -220,6 +240,9 @@ export const useConteudo = () => {
     textoDigitacaoIA,
     isDigitandoIA,
     respostasIA,
+    personalizarEstudo,
+    queryParams,
+    audioComIa,
     setarInfoParaEditarConteudo,
     formatarDialogo,
     formatarRespostaIA,

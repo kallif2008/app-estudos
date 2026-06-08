@@ -12,10 +12,13 @@ export const useApiConteudo = () => {
     idioma,
     consultandoIA,
     statusEstudo,
+    fraseAtual,
+    personalizarEstudo,
+    queryParams,
+    audioComIa,
     manipularRespostaCriacaoConteudo,
     iniciarDigitacaoIA,
     formatarRespostaIA,
-    fraseAtual,
   } = useConteudo();
 
   const { ativarLoading, desativarLoading } = useLoading();
@@ -35,10 +38,7 @@ export const useApiConteudo = () => {
       const response = await useClient.get(`/status/${idEstudoAtual.value}`);
 
       statusEstudo.value = response.data.status;
-
-      console.log("s", statusEstudo.value);
     } catch (error) {
-      console.log("Erro ao obter status do estudo:", error);
       return null;
     }
   };
@@ -76,6 +76,7 @@ export const useApiConteudo = () => {
       const formData = new FormData();
 
       formData.append("idioma", idioma.value);
+      if (!conteudo.value.frase) return;
       formData.append("frase", conteudo.value.frase);
       formData.append("inicioAudio", String(conteudo.value.inicioAudio));
       formData.append("fimAudio", String(conteudo.value.fimAudio));
@@ -93,15 +94,17 @@ export const useApiConteudo = () => {
     }
   };
 
-  const obterExplicacaoIA = async (frase: string) => {
+  const obterExplicacaoIA = async (frase: string, idAgente: string) => {
     try {
       consultandoIA.value = true;
-      const response: AxiosResponse<AnaliseFraseIA> = await useClient.post(
+      const response: AxiosResponse = await useClient.post(
         "/ia/analisar-frase",
-        { frase },
+        { frase, idAgente },
       );
 
+      console.log("texto", response);
       const texto = formatarRespostaIA(response.data);
+
       iniciarDigitacaoIA(texto, fraseAtual.value?._id || "");
     } finally {
       consultandoIA.value = false;
@@ -112,11 +115,39 @@ export const useApiConteudo = () => {
     const formData = new FormData();
 
     formData.append("idLicao", idEstudoAtual.value);
-    formData.append("frase", conteudo.value.frase);
 
-    if (conteudo.value.audio) {
+    if (conteudo.value.frase && personalizarEstudo.value.texto) {
+      formData.append("frase", conteudo.value.frase);
+    }
+
+    if (conteudo.value.audio && personalizarEstudo.value.audio) {
       formData.append("audio", conteudo.value.audio);
     }
+
+    if (conteudo.value.videoUrl && personalizarEstudo.value.video) {
+      formData.append("videoUrl", conteudo.value.videoUrl);
+    }
+
+    formData.append(
+      "gerarComIA",
+      personalizarEstudo.value.gerarComIA ? "true" : "false",
+    );
+
+    formData.append(
+      "converterTextoFrases",
+      personalizarEstudo.value.converterTextoFrases ? "true" : "false",
+    );
+
+    formData.append(
+      "extrairTextoAudio",
+      personalizarEstudo.value.extrairTextoAudio ? "true" : "false",
+    );
+
+    formData.append("idAgente", queryParams.value.agenteId || "");
+    formData.append(
+      "gerarAudioComIA",
+      personalizarEstudo.value.gerarAudioComIA ? "true" : "false",
+    );
 
     const resposta: AxiosResponse = await useClient.post("/frases", formData, {
       headers: {
@@ -136,6 +167,11 @@ export const useApiConteudo = () => {
     return URL.createObjectURL(blob);
   };
 
+  const criarAudioComIA = async (texto: string, index: number) => {
+    const response = await useClient.post("/ia/criar-audio", { texto });
+    audioComIa.value[index] = response.data;
+  };
+
   return {
     deletarFrase,
     atualizarFrases,
@@ -145,5 +181,6 @@ export const useApiConteudo = () => {
     atualizarAudio,
     obterExplicacaoIA,
     obterStatusEstudo,
+    criarAudioComIA,
   };
 };

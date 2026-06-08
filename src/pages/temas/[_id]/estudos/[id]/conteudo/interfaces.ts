@@ -5,6 +5,8 @@ type IFrases = {
   _id: string;
   idEstudo: string;
   traducao?: string;
+  textoCompleto?: string;
+  gerarAudioComIA: boolean;
 };
 
 interface IRespostaFrases {

@@ -5,13 +5,14 @@ import { useConteudo } from "./useConteudo";
 interface Mensagem {
   papel: "user" | "assistant";
   conteudo: string;
+  audio?: string;
 }
 
 const mensagens = ref<Mensagem[]>([]);
 const mensagemAtual = ref("");
 const enviando = ref(false);
 const abrirChat = ref(false);
-const { dataFrases } = useConteudo();
+const { dataFrases, queryParams } = useConteudo();
 
 export const useChatIA = () => {
   const enviarMensagem = async () => {
@@ -27,13 +28,26 @@ export const useChatIA = () => {
 
     try {
       const response = await useClient.post("/ia/conversar", {
-        mensagens: mensagens.value,
+        mensagens: mensagens.value.map((m) => ({
+          papel: m.papel,
+          conteudo: m.conteudo,
+        })),
         contexto: dataFrases.value.frases.map((f) => f.frase).join("\n"),
+        idAgente: queryParams.value.agenteId,
       });
-      mensagens.value.push({
-        papel: "assistant",
-        conteudo: response.data.resposta,
-      });
+      const resposta = response.data.resposta;
+      if (typeof resposta === "string") {
+        mensagens.value.push({
+          papel: "assistant",
+          conteudo: resposta,
+        });
+      } else {
+        mensagens.value.push({
+          papel: "assistant",
+          conteudo: resposta.texto,
+          audio: resposta.audio,
+        });
+      }
     } catch {
       mensagens.value.push({
         papel: "assistant",

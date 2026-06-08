@@ -1,5 +1,6 @@
 <template>
   <ModalTema
+    :titulo="tipoAcao === 'criar' ? 'Criar novo estudo' : 'Editar estudo'"
     :abrir-modal="abrirModal"
     :salvar="
       () =>
@@ -7,10 +8,7 @@
     "
     @fechar-modal="toggleModal()"
   >
-    <FormConteudo
-      :titulo="tipoAcao === 'criar' ? 'Criar novo estudo' : 'Editar estudo'"
-      v-model="estudo"
-    />
+    <FormConteudo v-model="estudo" />
   </ModalTema>
 
   <div class="relative min-h-screen overflow-hidden">
@@ -31,7 +29,7 @@
           <p class="text-slate-400 mt-1">Organize sua evolução</p>
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex gap-2 h-12">
           <button
             @click="toggleModal('criar')"
             class="px-5 rounded-xl font-medium bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-black shadow-[0_0_20px_rgba(34,211,238,.3)] hover:scale-105 transition"
@@ -98,6 +96,15 @@
                 <p class="text-slate-400 mt-1">
                   {{ estudo.descricao }}
                 </p>
+
+                <div class="flex items-center gap-2 mt-1 text-white">
+                  Agente:
+                  <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800/70 text-cyan-300 border border-cyan-500/20"
+                  >
+                    {{ estudo.nomeAgente }}
+                  </span>
+                </div>
               </div>
 
               <div class="flex gap-2">
@@ -105,7 +112,7 @@
                   class="action-button"
                   @click="
                     router.push(
-                      `/temas/${idTemaAtual}/estudos/${estudo._id}/conteudo`,
+                      `/temas/${idTemaAtual}/estudos/${estudo._id}/conteudo?agenteId=${estudo.idAgente}&agenteIdExplicacao=${estudo.idAgenteExplicacao}&tradutor=${estudo.tradutor}`,
                     )
                   "
                 >
@@ -116,8 +123,14 @@
                   class="action-button"
                   @click="
                     () => {
-                      setarEstudo(estudo.titulo, estudo.descricao, estudo._id);
-
+                      setarEstudo(
+                        estudo.titulo,
+                        estudo.descricao,
+                        estudo.tradutor,
+                        estudo.idAgente,
+                        estudo._id,
+                        estudo.idAgenteExplicacao,
+                      );
                       toggleModal('editar');
                     }
                   "
@@ -236,14 +249,17 @@ import { mdiMagnify, mdiPencil, mdiTrashCanOutline } from "@mdi/js";
 import { useRouter } from "vue-router";
 import Badge from "@/components/badge/index.vue";
 import { useConteudo } from "./[id]/conteudo/useConteudo";
+import { useApiAgentes } from "@/pages/agentes/useApiAgentes";
 
 defineProps<{
   _id: string;
 }>();
 
 const router = useRouter();
+const route = useRoute();
 
 const { abrirModal, tipoAcao, toggleModal } = useModal();
+const { listarAgentesSelect } = useApiAgentes();
 const {
   dataEstudos,
   idTemaAtual,
@@ -265,9 +281,10 @@ const { statusEstudo } = useConteudo();
 
 onMounted(async () => {
   idBtnStatusEstudo.value = 1;
-  const route = useRoute();
+
   idTemaAtual.value = route.params._id as string;
   statusEstudo.value = null;
-  await buscarEstudos();
+
+  await Promise.all([buscarEstudos(), listarAgentesSelect()]);
 });
 </script>

@@ -8,9 +8,18 @@ const dataEstudos = ref<IEstudos[]>([]);
 const idTemaAtual = ref<string>("");
 const idEstudoAtual = ref<string>("");
 const idBtnStatusEstudo = ref<number>(1);
-const estudo = ref<{ titulo: string; descricao: string }>({
+const estudo = ref<{
+  titulo: string;
+  descricao: string;
+  agenteId: string;
+  tradutor: boolean;
+  agenteIdExplicacao?: string;
+}>({
   titulo: "",
   descricao: "",
+  agenteId: "",
+  tradutor: false,
+  agenteIdExplicacao: "",
 });
 
 const filtroEstudo = [
@@ -23,14 +32,25 @@ const manipularRespostaCriacaoEstudo = async (callback: () => void) => {
   useRespostaApi(201);
   await callback();
   abrirModal.value = false;
-  estudo.value = { titulo: "", descricao: "" };
+  estudo.value = { titulo: "", descricao: "", agenteId: "", tradutor: false };
   idEstudoAtual.value = "";
 };
 
-const setarEstudo = (titulo: string, descricao: string, _id?: string) => {
+const setarEstudo = (
+  titulo: string,
+  descricao: string,
+  tradutor: boolean,
+  agenteId: string,
+  id?: string,
+  agenteIdExplicacao?: string,
+) => {
   estudo.value.titulo = titulo;
   estudo.value.descricao = descricao;
-  if (_id) idEstudoAtual.value = _id;
+  estudo.value.agenteId = agenteId;
+  estudo.value.tradutor = tradutor;
+  estudo.value.agenteIdExplicacao = agenteIdExplicacao;
+
+  if (id) idEstudoAtual.value = id;
 };
 
 export const useEstudos = () => {

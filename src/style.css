@@ -12,3 +12,7 @@ body {
 * {
   box-sizing: border-box;
 }
+
+.text-gray-700 {
+  color: #fff !important;
+}

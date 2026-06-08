@@ -5,6 +5,10 @@ interface IEstudos {
   status: string;
   createdAt: string;
   updatedAt: string;
+  nomeAgente: string;
+  idAgente: string;
+  tradutor: boolean;
+  idAgenteExplicacao?: string;
   _id: string;
 }
 

@@ -38,7 +38,6 @@
                 v-model="usuario.email"
                 type="email"
                 placeholder="seu@email.com"
-                class="bg-[#0F172A]/90 rounded-xl"
               />
             </div>
           </div>
@@ -54,7 +53,6 @@
                 v-model="usuario.senha"
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="••••••••"
-                class="bg-[#0F172A]/90 rounded-xl"
               >
                 <template #trailing>
                   <button
@@ -97,6 +95,7 @@
           <button
             type="button"
             class="w-full h-12 rounded-xl border border-cyan-400/60 text-cyan-300 hover:bg-cyan-500/10 hover:shadow-[0_0_15px_rgba(34,211,238,.2)] transition"
+            @click="irParaCadastro"
           >
             Criar conta
           </button>
@@ -116,10 +115,16 @@
 </route>
 
 <script setup lang="ts">
-import Input from "@/components//input/index.vue";
+import { useRouter } from "vue-router";
+import Input from "@/components/input/index.vue";
 import { useLogin } from "./useLogin";
 import { useApiLogin } from "./useApiLogin";
 
+const router = useRouter();
 const { usuario, showPassword, loading, togglePassword } = useLogin();
 const { login } = useApiLogin();
+
+const irParaCadastro = () => {
+  router.push("/cadastro");
+};
 </script>

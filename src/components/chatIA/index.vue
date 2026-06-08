@@ -51,6 +51,12 @@
                   <p class="text-sm whitespace-pre-line leading-relaxed">
                     {{ msg.conteudo }}
                   </p>
+                  <audio
+                    v-if="msg.audio"
+                    :src="`data:audio/wav;base64,${msg.audio}`"
+                    controls
+                    class="w-full mt-2 h-8"
+                  />
                 </div>
               </div>
 

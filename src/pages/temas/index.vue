@@ -56,7 +56,7 @@
             class="p-[2px] rounded-2xl bg-gradient-to-r from-cyan-500/50 to-fuchsia-500/50"
           >
             <div
-              class="rounded-2xl bg-[#081121]/90 backdrop-blur-lg p-5 flex justify-between items-center transition hover:translate-y-[-2px] hover:shadow-[0_0_30px_rgba(34,211,238,.15)]"
+              class="rounded-2xl bg-[#081121]/90 backdrop-blur-lg p-5 flex justify-between items-center transition hover:translate-y-[-1px] hover:shadow-[0_0_30px_rgba(34,211,238,.15)]"
             >
               <div>
                 <h2 class="text-white font-semibold text-lg">

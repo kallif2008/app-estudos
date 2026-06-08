@@ -11,13 +11,63 @@
       }
     "
     @fechar-modal="toggleModal('criar')"
-    :titulo="tipoAcao === 'criar' ? 'Criar conteúdo' : 'Editar conteúdo'"
+    :titulo="tipoAcao === 'criar' ? 'Monte o seu estudo' : 'Edite o seu estudo'"
   >
     <div class="flex flex-col gap-4">
-      <CortarAudio @cortado="(file: File) => (conteudo.audio = file)" />
+      <div class="flex flex-row flex-wrap gap-2 items-center justify-start">
+        <ce-checkbox
+          label="Gerar com IA"
+          v-model="personalizarEstudo.gerarComIA"
+        />
+        <ce-checkbox
+          label="Gerar áudio com IA"
+          v-model="personalizarEstudo.gerarAudioComIA"
+          v-if="personalizarEstudo.gerarComIA"
+        />
+        <ce-checkbox
+          label="Texto"
+          v-model="personalizarEstudo.texto"
+          v-if="!personalizarEstudo.gerarComIA"
+        />
+        <ce-checkbox
+          label="Áudio"
+          v-model="personalizarEstudo.audio"
+          v-if="!personalizarEstudo.gerarComIA"
+        />
+        <ce-checkbox
+          label="Vídeo"
+          v-model="personalizarEstudo.video"
+          v-if="!personalizarEstudo.gerarComIA"
+        />
+        <ce-checkbox
+          label="Extrair texto do áudio"
+          v-model="personalizarEstudo.extrairTextoAudio"
+          v-if="!personalizarEstudo.gerarComIA"
+        />
+        <ce-checkbox
+          :disabled="
+            !personalizarEstudo.texto &&
+            !personalizarEstudo.extrairTextoAudio &&
+            !personalizarEstudo.gerarComIA
+          "
+          label="Converter texto em frases"
+          v-model="personalizarEstudo.converterTextoFrases"
+        />
+      </div>
+
+      <CortarAudio
+        @cortado="(file: File) => (conteudo.audio = file)"
+        v-if="personalizarEstudo.audio && !personalizarEstudo.gerarComIA"
+      />
+
+      <Input
+        v-if="personalizarEstudo.video && !personalizarEstudo.gerarComIA"
+        type="url"
+        placeholder="Digite a URL do vídeo"
+      />
 
       <textarea
-        v-if="tipoAcao !== 'editar'"
+        v-if="personalizarEstudo.texto && !personalizarEstudo.gerarComIA"
         v-model="conteudo.frase"
         rows="4"
         placeholder="Texto completo"
@@ -68,6 +118,7 @@
   </Modal>
 
   <Modal
+    v-if="!fraseAtual?.textoCompleto"
     :abrir-modal="abrirModalVisualizarTextoCompleto"
     @fechar-modal="abrirModalVisualizarTextoCompleto = false"
     titulo="Texto completo"
@@ -148,111 +199,14 @@
         <!-- card -->
 
         <div
-          class="rounded-3xl p-[1px] bg-gradient-to-r from-cyan-500 to-fuchsia-500"
+          class="rounded-3xl p-[2px] bg-gradient-to-r from-cyan-500 to-fuchsia-500"
         >
           <div
             class="rounded-3xl bg-[#081121]/90 backdrop-blur-xl p-8 min-h-[250px] flex flex-col justify-between"
           >
             <div class="flex flex-col items-start">
-              <div class="flex justify-between mb-8">
-                <div class="flex gap-2 sm:flex-wrap">
-                  <ce-tooltip location="top" text="Traduzir frase">
-                    <template #activator>
-                      <button
-                        :disabled="!!fraseAtual?.traducao"
-                        class="action-button"
-                        @click="
-                          () => {
-                            setarInfoParaEditarConteudo(fraseAtual as IFrases);
+              <OpcoesEstudo />
 
-                            atualizarFrases();
-                          }
-                        "
-                      >
-                        <svg-icon
-                          type="mdi"
-                          :path="mdiGoogleTranslate"
-                          :class="
-                            fraseAtual?.traducao
-                              ? 'text-green-600'
-                              : 'text-white'
-                          "
-                        />
-                      </button>
-                    </template>
-                  </ce-tooltip>
-                  <ce-tooltip location="top" text="Ouvir frase">
-                    <template #activator>
-                      <button
-                        class="action-button"
-                        @click="
-                          () => {
-                            tocarTrecho(
-                              Number(fraseAtual?.inicioAudio),
-                              Number(fraseAtual?.fimAudio),
-                            );
-                          }
-                        "
-                      >
-                        <svg-icon type="mdi" :path="mdiPlay" />
-                      </button>
-                    </template>
-                  </ce-tooltip>
-                  <ce-tooltip location="top" text="Editar frase">
-                    <template #activator>
-                      <button
-                        class="action-button"
-                        @click="
-                          () => {
-                            setarInfoParaEditarConteudo(fraseAtual as IFrases);
-
-                            abrirModalEditarAudio = true;
-                          }
-                        "
-                      >
-                        <svg-icon type="mdi" :path="mdiPencil" />
-                      </button>
-                    </template>
-                  </ce-tooltip>
-                  <ce-tooltip location="top" text="Deletar frase">
-                    <template #activator>
-                      <button
-                        class="action-button"
-                        @click="deletarFrase(fraseAtual?._id || '')"
-                      >
-                        <svg-icon type="mdi" :path="mdiTrashCan" />
-                      </button>
-                    </template>
-                  </ce-tooltip>
-                  <ce-tooltip location="top" text="Visualizar texto completo">
-                    <template #activator>
-                      <button
-                        class="action-button"
-                        @click="abrirModalVisualizarTextoCompleto = true"
-                      >
-                        <svg-icon type="mdi" :path="mdiEye" />
-                      </button>
-                    </template>
-                  </ce-tooltip>
-                  <ce-tooltip location="top" text="Explicar com IA">
-                    <template #activator>
-                      <button
-                        class="action-button"
-                        @click="obterExplicacaoIA(fraseAtual?.frase || '')"
-                      >
-                        <svg-icon type="mdi" :path="mdiRobotHappy" />
-                      </button>
-                    </template>
-                  </ce-tooltip>
-                  <ce-tooltip location="top" text="Chat com IA">
-                    <template #activator>
-                      <button class="action-button" @click="alternarChat">
-                        <svg-icon type="mdi" :path="mdiChat" />
-                      </button>
-                    </template>
-                  </ce-tooltip>
-                </div>
-              </div>
               <ce-tooltip
                 location="top"
                 focus
@@ -260,9 +214,18 @@
               >
                 <template #activator>
                   <button
-                    class="text-white font-semibold w-full text-3xl whitespace-pre-line leading-relaxed"
+                    class="text-white font-semibold w-full whitespace-pre-line leading-relaxed"
+                    :class="
+                      fraseAtual?.textoCompleto
+                        ? 'text-base text-start'
+                        : 'text-3xl'
+                    "
                   >
-                    {{ fraseAtual?.frase }}
+                    {{
+                      fraseAtual?.frase ||
+                      fraseAtual?.textoCompleto ||
+                      "Sem frase"
+                    }}
                   </button>
                 </template>
               </ce-tooltip>
@@ -290,7 +253,10 @@
 
         <!-- navegação -->
 
-        <div class="flex justify-center gap-4 mt-8">
+        <div
+          class="flex justify-center gap-4 mt-8"
+          v-if="!fraseAtual?.textoCompleto"
+        >
           <button
             @click="cardAnterior"
             :disabled="indiceAtual === 0 || isDigitandoIA || consultandoIA"
@@ -315,11 +281,14 @@
         <!-- áudio -->
 
         <div
+          v-if="audioUrl || audioComIa[indiceAtual]"
           class="flex gap-1 mt-8 rounded-full bg-gradient-to-r from-cyan-500 to-fuchsia-500 p-3"
         >
           <audio
             ref="audioPlayer"
-            :src="audioUrl || ''"
+            :src="
+              audioUrl || `data:audio/wav;base64,${audioComIa[indiceAtual]}`
+            "
             controls
             class="w-full bg-transparent"
           />
@@ -353,28 +322,20 @@
 import Modal from "@/components/modal/index.vue";
 import ChatIA from "@/components/chatIA/index.vue";
 import { useConteudo } from "./useConteudo";
-import { onMounted, ref, watch } from "vue";
+import { onBeforeMount, onMounted, ref, watch } from "vue";
 import { useApiConteudo } from "./useApiConteudo";
-import { useChatIA } from "./useChatIA";
+
 ///@ts-ignore
 import SvgIcon from "@jamescoyle/vue-icon";
-import {
-  mdiPencil,
-  mdiKeyboardBackspace,
-  mdiRobotHappy,
-  mdiChat,
-  mdiPlay,
-  mdiGoogleTranslate,
-  mdiTrashCan,
-  mdiEye,
-} from "@mdi/js";
+import { mdiPencil, mdiKeyboardBackspace } from "@mdi/js";
 import { useRoute, useRouter } from "vue-router";
 import SemConteudo from "@/components/semConteudo/index.vue";
 import { useModal } from "@/components/modal/useModal";
 import { useLoading } from "@/components/loading/useLoading";
 import CortarAudio from "@/components/cortarAudio/index.vue";
-import type { IFrases } from "./interfaces";
-import { CeTooltip } from "@comercti/vue-components";
+import OpcoesEstudo from "@/components/opcoesEstudo/index.vue";
+import { CeTooltip, CeCheckbox } from "@comercti/vue-components";
+import Input from "@/components//input/index.vue";
 
 const { ativarLoading, desativarLoading } = useLoading();
 
@@ -385,41 +346,6 @@ defineProps<{
 
 const route = useRoute();
 const router = useRouter();
-const audioPlayer = ref<HTMLAudioElement | null>(null);
-
-const tocarTrecho = (inicio: number | string, fim: number | string) => {
-  if (!audioPlayer.value) return;
-
-  const player = audioPlayer.value;
-
-  // garantir que sejam números
-  let start = Number(inicio);
-  let end = Number(fim);
-
-  // se backend enviou em milissegundos (ex: 140640), converte para segundos
-  if (!isNaN(start) && start > 1000) start = start / 1000;
-  if (!isNaN(end) && end > 1000) end = end / 1000;
-
-  if (isNaN(start) || isNaN(end)) return;
-  if (end <= start) return;
-
-  // garantir que o tempo pedido esteja dentro da duração do áudio
-  if (player.duration && start > player.duration) return;
-
-  player.currentTime = start;
-  player.play();
-
-  const pararNoFim = () => {
-    if (player.currentTime >= end) {
-      player.pause();
-      player.removeEventListener("timeupdate", pararNoFim);
-    }
-  };
-
-  // remover listeners antigos para evitar múltiplas chamadas
-  player.removeEventListener("timeupdate", pararNoFim);
-  player.addEventListener("timeupdate", pararNoFim);
-};
 
 const {
   dataFrases,
@@ -435,10 +361,12 @@ const {
   textoDigitacaoIA,
   isDigitandoIA,
   statusEstudo,
+  personalizarEstudo,
+  queryParams,
+  audioComIa,
   criarConteudo,
   obterConteudo,
   toggleModal,
-  setarInfoParaEditarConteudo,
   proximoCard,
   cardAnterior,
 } = useConteudo();
@@ -449,14 +377,18 @@ const {
   atualizarFrases,
   atualizarAudio,
   carregarAudio,
-  deletarFrase,
-  obterExplicacaoIA,
   obterStatusEstudo,
 } = useApiConteudo();
 
 const { abrirModal } = useModal();
 
-const { alternarChat } = useChatIA();
+onBeforeMount(() => {
+  queryParams.value = {
+    agenteId: (route.query.agenteId as string) || "",
+    agenteIdExplicacao: (route.query.agenteIdExplicacao as string) || "",
+    tradutor: route.query.tradutor === "true",
+  };
+});
 
 onMounted(async () => {
   idEstudoAtual.value = route.params.id as string;
@@ -476,6 +408,47 @@ watch(
     desativarLoading();
   },
   { immediate: true },
+);
+
+watch(
+  () => personalizarEstudo.value.extrairTextoAudio,
+  (novoValor) => {
+    if (novoValor) {
+      personalizarEstudo.value.audio = true;
+      return;
+    }
+    personalizarEstudo.value.converterTextoFrases = false;
+  },
+);
+
+watch(
+  () => personalizarEstudo.value.audio,
+  (novoValor) => {
+    if (!novoValor) {
+      personalizarEstudo.value.extrairTextoAudio = false;
+    }
+  },
+);
+
+watch(
+  () => personalizarEstudo.value.texto,
+  (novoValor) => {
+    if (novoValor) {
+      personalizarEstudo.value.converterTextoFrases = false;
+      personalizarEstudo.value.extrairTextoAudio = false;
+    }
+  },
+  { deep: true },
+);
+
+watch(
+  () => personalizarEstudo.value.extrairTextoAudio,
+  (novoValor) => {
+    if (novoValor) {
+      personalizarEstudo.value.texto = false;
+      return;
+    }
+  },
 );
 </script>
 
