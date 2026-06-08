@@ -47,8 +47,8 @@ const props = defineProps<{
   modelValue?: {
     titulo: string;
     descricao: string;
-    agenteId: string;
-    tradutor: boolean;
+    agenteId?: string;
+    tradutor?: boolean;
     agenteIdExplicacao?: string;
   };
 }>();
@@ -59,7 +59,8 @@ const emit = defineEmits<{
     value: {
       titulo: string;
       descricao: string;
-      agenteId: string;
+      agenteId?: string;
+      tradutor?: boolean;
       agenteIdExplicacao?: string;
     },
   ): void;

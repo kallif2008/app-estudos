@@ -2,7 +2,6 @@ import { useClient } from "@/client";
 import { useConteudo } from "./useConteudo";
 import type { AxiosResponse } from "axios";
 import { useLoading } from "@/components/loading/useLoading";
-import type { AnaliseFraseIA } from "./interfaces";
 
 export const useApiConteudo = () => {
   const {

@@ -1,11 +1,8 @@
 import { useClient } from "@/client";
 import { useEstudos } from "./useEstudos";
 import type { IRespostaEstudos } from "./interfaces";
-import { useNotificacoes } from "@/utils/notificacoes";
 
 export const useApiEstudos = () => {
-  const { notificar } = useNotificacoes();
-
   const { dataEstudos, idTemaAtual, estudo, manipularRespostaCriacaoEstudo } =
     useEstudos();
 

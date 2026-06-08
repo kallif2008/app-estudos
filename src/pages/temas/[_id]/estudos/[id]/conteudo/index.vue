@@ -322,7 +322,7 @@
 import Modal from "@/components/modal/index.vue";
 import ChatIA from "@/components/chatIA/index.vue";
 import { useConteudo } from "./useConteudo";
-import { onBeforeMount, onMounted, ref, watch } from "vue";
+import { onBeforeMount, onMounted, watch } from "vue";
 import { useApiConteudo } from "./useApiConteudo";
 
 ///@ts-ignore
