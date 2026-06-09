@@ -66,12 +66,11 @@
         placeholder="Digite a URL do vídeo"
       />
 
-      <textarea
+      <Textarea
         v-if="personalizarEstudo.texto && !personalizarEstudo.gerarComIA"
         v-model="conteudo.frase"
-        rows="4"
-        placeholder="Texto completo"
-        class="rounded-xl p-4 bg-[#0F172A] border border-cyan-500/20 text-white"
+        id="frase"
+        placeholder="Digite a frase"
       />
     </div>
   </Modal>
@@ -89,30 +88,18 @@
     "
   >
     <div class="space-y-4">
-      <textarea
+      <Textarea
+        label="Frase"
         v-model="conteudo.frase"
-        rows="2"
-        placeholder="Frase"
-        class="w-full rounded-xl p-4 bg-[#0F172A] border border-cyan-500/20 text-white"
+        id="frase"
+        placeholder="Digite a frase"
       />
 
-      <textarea
+      <Textarea
+        label="Tradução"
         v-model="conteudo.traducao"
-        rows="2"
-        placeholder="Tradução"
-        class="w-full rounded-xl p-4 bg-[#0F172A] border border-cyan-500/20 text-white"
-      />
-
-      <CortarAudio
-        emitir-tempo-cortado
-        :audio="audioUrl"
-        @tempo="
-          (tempos) => {
-            conteudo.inicioAudio = tempos.inicioAudio;
-
-            conteudo.fimAudio = tempos.fimAudio;
-          }
-        "
+        id="traducao"
+        placeholder="Digite a tradução"
       />
     </div>
   </Modal>
@@ -205,7 +192,7 @@
             class="rounded-3xl bg-[#081121]/90 backdrop-blur-xl p-8 min-h-[250px] flex flex-col justify-between"
           >
             <div class="flex flex-col items-start">
-              <OpcoesEstudo />
+              <OpcoesEstudo :tocar-trecho="tocarTrecho" />
 
               <ce-tooltip
                 location="top"
@@ -322,9 +309,9 @@
 import Modal from "@/components/modal/index.vue";
 import ChatIA from "@/components/chatIA/index.vue";
 import { useConteudo } from "./useConteudo";
-import { onBeforeMount, onMounted, watch } from "vue";
+import { onBeforeMount, onMounted, ref, watch } from "vue";
 import { useApiConteudo } from "./useApiConteudo";
-
+import Textarea from "@/components/textarea/index.vue";
 ///@ts-ignore
 import SvgIcon from "@jamescoyle/vue-icon";
 import { mdiPencil, mdiKeyboardBackspace } from "@mdi/js";
@@ -395,6 +382,41 @@ onMounted(async () => {
 
   await Promise.all([obterConteudo(obterFrases), obterStatusEstudo()]);
 });
+
+const audioPlayer = ref<HTMLAudioElement | null>(null);
+const tocarTrecho = (inicio: number | string, fim: number | string) => {
+  if (!audioPlayer.value) return;
+
+  const player = audioPlayer.value;
+
+  // garantir que sejam números
+  let start = Number(inicio);
+  let end = Number(fim);
+
+  // se backend enviou em milissegundos (ex: 140640), converte para segundos
+  if (!isNaN(start) && start > 1000) start = start / 1000;
+  if (!isNaN(end) && end > 1000) end = end / 1000;
+
+  if (isNaN(start) || isNaN(end)) return;
+  if (end <= start) return;
+
+  // garantir que o tempo pedido esteja dentro da duração do áudio
+  if (player.duration && start > player.duration) return;
+
+  player.currentTime = start;
+  player.play();
+
+  const pararNoFim = () => {
+    if (player.currentTime >= end) {
+      player.pause();
+      player.removeEventListener("timeupdate", pararNoFim);
+    }
+  };
+
+  // remover listeners antigos para evitar múltiplas chamadas
+  player.removeEventListener("timeupdate", pararNoFim);
+  player.addEventListener("timeupdate", pararNoFim);
+};
 
 watch(
   () => dataFrases.value,

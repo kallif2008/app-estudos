@@ -16,6 +16,7 @@
         class=""
       />
       <Select
+        v-if="exibirInputsAgentes"
         label="Agente"
         placeholder="Selecione um agente"
         :items="agentesSelect"
@@ -23,6 +24,7 @@
       />
 
       <Select
+        v-if="exibirInputsAgentes"
         label="Agente para explicação"
         placeholder="Selecione um agente para explicação"
         :items="agentesSelect"
@@ -43,15 +45,21 @@ import { CeToggle } from "@comercti/vue-components";
 
 const { agentesSelect } = useAgentes();
 
-const props = defineProps<{
-  modelValue?: {
-    titulo: string;
-    descricao: string;
-    agenteId?: string;
-    tradutor?: boolean;
-    agenteIdExplicacao?: string;
-  };
-}>();
+const props = withDefaults(
+  defineProps<{
+    modelValue?: {
+      titulo: string;
+      descricao: string;
+      agenteId?: string;
+      tradutor?: boolean;
+      agenteIdExplicacao?: string;
+    };
+    exibirInputsAgentes?: boolean;
+  }>(),
+  {
+    exibirInputsAgentes: true,
+  },
+);
 
 const emit = defineEmits<{
   (

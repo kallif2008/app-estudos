@@ -19,7 +19,7 @@
 defineProps<{
   id: string;
   placeholder?: string;
-  modelValue?: string;
+  modelValue?: string | null;
   label?: string;
 }>();
 

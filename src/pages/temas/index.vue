@@ -7,6 +7,7 @@
     <FormConteudo
       :titulo="tipoAcao === 'criar' ? 'Criar novo tema' : 'Editar tema'"
       v-model="conteudo"
+      :exibir-inputs-agentes="false"
     />
   </ModalEstudos>
 

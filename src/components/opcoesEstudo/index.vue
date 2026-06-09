@@ -151,10 +151,13 @@ import {
 } from "@mdi/js";
 import { CeTooltip } from "@comercti/vue-components";
 import type { IFrases } from "@/pages/temas/[_id]/estudos/[id]/conteudo/interfaces";
-import { ref } from "vue";
 import { useChatIA } from "@/pages/temas/[_id]/estudos/[id]/conteudo/useChatIA";
 import { useConteudo } from "@/pages/temas/[_id]/estudos/[id]/conteudo/useConteudo";
 import { useApiConteudo } from "@/pages/temas/[_id]/estudos/[id]/conteudo/useApiConteudo";
+
+defineProps<{
+  tocarTrecho: (inicio: string | number, fim: string | number) => void;
+}>();
 
 const {
   setarInfoParaEditarConteudo,
@@ -168,41 +171,6 @@ const {
 const { alternarChat } = useChatIA();
 const { deletarFrase, obterExplicacaoIA, criarAudioComIA, atualizarFrases } =
   useApiConteudo();
-
-const audioPlayer = ref<HTMLAudioElement | null>(null);
-const tocarTrecho = (inicio: number | string, fim: number | string) => {
-  if (!audioPlayer.value) return;
-
-  const player = audioPlayer.value;
-
-  // garantir que sejam números
-  let start = Number(inicio);
-  let end = Number(fim);
-
-  // se backend enviou em milissegundos (ex: 140640), converte para segundos
-  if (!isNaN(start) && start > 1000) start = start / 1000;
-  if (!isNaN(end) && end > 1000) end = end / 1000;
-
-  if (isNaN(start) || isNaN(end)) return;
-  if (end <= start) return;
-
-  // garantir que o tempo pedido esteja dentro da duração do áudio
-  if (player.duration && start > player.duration) return;
-
-  player.currentTime = start;
-  player.play();
-
-  const pararNoFim = () => {
-    if (player.currentTime >= end) {
-      player.pause();
-      player.removeEventListener("timeupdate", pararNoFim);
-    }
-  };
-
-  // remover listeners antigos para evitar múltiplas chamadas
-  player.removeEventListener("timeupdate", pararNoFim);
-  player.addEventListener("timeupdate", pararNoFim);
-};
 </script>
 
 <style scoped>
