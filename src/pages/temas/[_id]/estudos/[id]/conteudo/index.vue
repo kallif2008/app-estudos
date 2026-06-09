@@ -309,7 +309,7 @@
 import Modal from "@/components/modal/index.vue";
 import ChatIA from "@/components/chatIA/index.vue";
 import { useConteudo } from "./useConteudo";
-import { onBeforeMount, onMounted, ref, watch } from "vue";
+import { onBeforeMount, onMounted, onUnmounted, ref, watch } from "vue";
 import { useApiConteudo } from "./useApiConteudo";
 import Textarea from "@/components/textarea/index.vue";
 ///@ts-ignore
@@ -381,7 +381,34 @@ onMounted(async () => {
   idEstudoAtual.value = route.params.id as string;
 
   await Promise.all([obterConteudo(obterFrases), obterStatusEstudo()]);
+
+  if (dataFrases.value.frases.length === 0) {
+    iniciarPolling();
+  }
 });
+
+onUnmounted(() => {
+  pararPolling();
+});
+
+let pollingInterval: ReturnType<typeof setInterval> | null = null;
+
+const iniciarPolling = () => {
+  pollingInterval = setInterval(async () => {
+    await Promise.all([obterConteudo(obterFrases), obterStatusEstudo()]);
+
+    if (dataFrases.value.frases.length > 0) {
+      pararPolling();
+    }
+  }, 5000);
+};
+
+const pararPolling = () => {
+  if (pollingInterval) {
+    clearInterval(pollingInterval);
+    pollingInterval = null;
+  }
+};
 
 const audioPlayer = ref<HTMLAudioElement | null>(null);
 const tocarTrecho = (inicio: number | string, fim: number | string) => {

@@ -23,13 +23,8 @@ export const useApiConteudo = () => {
   const { ativarLoading, desativarLoading } = useLoading();
 
   const obterFrases = async () => {
-    try {
-      ativarLoading();
-      const response = await useClient.get(`/frases/${idEstudoAtual.value}`);
-      return response.data;
-    } finally {
-      desativarLoading();
-    }
+    const response = await useClient.get(`/frases/${idEstudoAtual.value}`);
+    return response.data;
   };
 
   const obterStatusEstudo = async () => {

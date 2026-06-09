@@ -26,6 +26,7 @@ const isRotaIgnorada = (url?: string): boolean => {
     /^\/frases\/[^/]+$/,
     /^\/audios\/[^/]+$/,
     /^\/ia\/analisar-frase$/,
+    /^\/status\/[^/]+$/,
   ];
 
   return rotasIgnoradas.some((regex) => regex.test(pathname));
