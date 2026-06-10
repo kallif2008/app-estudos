@@ -495,12 +495,6 @@ const milissegundosParaHMS = (ms: number | undefined | null): string => {
   return `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`;
 };
 
-const hmsParaMilissegundos = (valor: string): number => {
-  if (!valor) return 0;
-  const [horas = 0, minutos = 0, segundos = 0] = valor.split(":").map(Number);
-  return (horas * 3600 + minutos * 60 + segundos) * 1000;
-};
-
 const audioPlayer = ref<HTMLAudioElement | null>(null);
 const tocarTrecho = (inicio: number | string, fim: number | string) => {
   if (!audioPlayer.value) return;

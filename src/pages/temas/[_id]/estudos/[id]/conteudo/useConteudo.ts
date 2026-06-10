@@ -2,7 +2,7 @@ import { computed, ref, watch } from "vue";
 import { useRespostaApi } from "@/utils/manipularRespotasApi";
 import { useModal } from "@/components/modal/useModal";
 import { useLoading } from "@/components/loading/useLoading";
-import type { AnaliseFraseIA, IFrases, IRespostaFrases } from "./interfaces";
+import type { IFrases, IRespostaFrases } from "./interfaces";
 import type { AxiosResponse } from "node_modules/axios/index.d.cts";
 
 const { ativarLoading, desativarLoading } = useLoading();
