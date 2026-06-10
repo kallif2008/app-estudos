@@ -6,13 +6,15 @@
     :salvar="
       () => {
         tipoAcao === 'criar'
-          ? criarConteudo(criarFrase, obterFrases)
+          ? criarConteudo(criarFrase, obterStatusEstudo)
           : atualizarAudio();
       }
     "
     @fechar-modal="toggleModal('criar')"
-    :titulo="tipoAcao === 'criar' ? 'Monte o seu estudo' : 'Edite o seu estudo'"
+    titulo="Monte o seu estudo"
   >
+    <Loading :show-loading="showLoading" mensagem="SELECIONANDO TRECHO" />
+
     <div class="flex flex-col gap-4">
       <div class="flex flex-row flex-wrap gap-2 items-center justify-start">
         <ce-checkbox
@@ -80,6 +82,7 @@
   <Modal
     :abrir-modal="abrirModalEditarAudio"
     @fechar-modal="abrirModalEditarAudio = false"
+    titulo="Edite seu estudo"
     :salvar="
       () => {
         atualizarFrases();
@@ -87,7 +90,7 @@
       }
     "
   >
-    <div class="space-y-4">
+    <div class="flex flex-col justify-center gap-4">
       <Textarea
         label="Frase"
         v-model="conteudo.frase"
@@ -101,6 +104,47 @@
         id="traducao"
         placeholder="Digite a tradução"
       />
+
+      <div
+        v-if="audioUrl && !fraseAtual?.textoCompleto"
+        class="flex flex-col justify-center gap-4"
+      >
+        <div
+          class="flex gap-1 rounded-full bg-gradient-to-r from-cyan-500 to-fuchsia-500 p-3"
+        >
+          <audio
+            ref="audioPlayer"
+            :src="
+              audioUrl || `data:audio/wav;base64,${audioComIa[indiceAtual]}`
+            "
+            controls
+            class="w-full"
+          />
+        </div>
+
+        <div class="flex items-center sm:flex-col gap-2 w-full">
+          <Input
+            type="time"
+            label="Início áudio"
+            class="!w-full"
+            :modelValue="milissegundosParaHMS(fraseAtual?.inicioAudio)"
+            @update:model-value="
+              (valor) => (conteudo.inicioAudio = String(valor))
+            "
+          />
+          <Input
+            type="time"
+            label="Final áudio"
+            class="!w-full"
+            :modelValue="milissegundosParaHMS(fraseAtual?.fimAudio)"
+            @update:model-value="
+              (valor) => {
+                conteudo.fimAudio = String(valor);
+              }
+            "
+          />
+        </div>
+      </div>
     </div>
   </Modal>
 
@@ -165,13 +209,28 @@
           <h1 class="text-3xl font-bold text-white">Seus conteúdos</h1>
 
           <div class="flex items-center gap-3">
-            <button @click="router.back()" class="action-button">
-              <svg-icon
-                type="mdi"
-                :path="mdiKeyboardBackspace"
-                class="w-5 h-5"
-              />
-            </button>
+            <ce-tooltip location="top" text="Deletar conteúdo completo">
+              <template #activator>
+                <button
+                  class="action-button"
+                  @click="deletarConteudoCompleto(idEstudoAtual)"
+                >
+                  <svg-icon type="mdi" :path="mdiTrashCan" />
+                </button>
+              </template>
+            </ce-tooltip>
+
+            <ce-tooltip location="top" text="Voltar">
+              <template #activator>
+                <button @click="router.back()" class="action-button">
+                  <svg-icon
+                    type="mdi"
+                    :path="mdiKeyboardBackspace"
+                    class="w-5 h-5"
+                  />
+                </button>
+              </template>
+            </ce-tooltip>
           </div>
         </div>
 
@@ -314,7 +373,7 @@ import { useApiConteudo } from "./useApiConteudo";
 import Textarea from "@/components/textarea/index.vue";
 ///@ts-ignore
 import SvgIcon from "@jamescoyle/vue-icon";
-import { mdiPencil, mdiKeyboardBackspace } from "@mdi/js";
+import { mdiPencil, mdiKeyboardBackspace, mdiTrashCan } from "@mdi/js";
 import { useRoute, useRouter } from "vue-router";
 import SemConteudo from "@/components/semConteudo/index.vue";
 import { useModal } from "@/components/modal/useModal";
@@ -323,6 +382,7 @@ import CortarAudio from "@/components/cortarAudio/index.vue";
 import OpcoesEstudo from "@/components/opcoesEstudo/index.vue";
 import { CeTooltip, CeCheckbox } from "@comercti/vue-components";
 import Input from "@/components//input/index.vue";
+import Loading from "@/components/loading/index.vue";
 
 const { ativarLoading, desativarLoading } = useLoading();
 
@@ -351,6 +411,7 @@ const {
   personalizarEstudo,
   queryParams,
   audioComIa,
+  showLoading,
   criarConteudo,
   obterConteudo,
   toggleModal,
@@ -365,6 +426,7 @@ const {
   atualizarAudio,
   carregarAudio,
   obterStatusEstudo,
+  deletarConteudoCompleto,
 } = useApiConteudo();
 
 const { abrirModal } = useModal();
@@ -380,9 +442,17 @@ onBeforeMount(() => {
 onMounted(async () => {
   idEstudoAtual.value = route.params.id as string;
 
-  await Promise.all([obterConteudo(obterFrases), obterStatusEstudo()]);
+  await obterStatusEstudo();
 
-  if (dataFrases.value.frases.length === 0) {
+  if (statusEstudo.value === "concluido") {
+    await obterConteudo(obterFrases);
+    return;
+  }
+
+  if (
+    statusEstudo.value === "pendente" ||
+    statusEstudo.value === "processando"
+  ) {
     iniciarPolling();
   }
 });
@@ -395,9 +465,15 @@ let pollingInterval: ReturnType<typeof setInterval> | null = null;
 
 const iniciarPolling = () => {
   pollingInterval = setInterval(async () => {
-    await Promise.all([obterConteudo(obterFrases), obterStatusEstudo()]);
+    await obterStatusEstudo();
 
-    if (dataFrases.value.frases.length > 0) {
+    if (statusEstudo.value === "concluido") {
+      await obterConteudo(obterFrases);
+      pararPolling();
+      return;
+    }
+
+    if (statusEstudo.value === "erro") {
       pararPolling();
     }
   }, 5000);
@@ -408,6 +484,21 @@ const pararPolling = () => {
     clearInterval(pollingInterval);
     pollingInterval = null;
   }
+};
+
+const milissegundosParaHMS = (ms: number | undefined | null): string => {
+  if (ms === undefined || ms === null || isNaN(Number(ms))) return "";
+  const totalSegundos = Math.floor(Number(ms) / 1000);
+  const horas = Math.floor(totalSegundos / 3600);
+  const minutos = Math.floor((totalSegundos % 3600) / 60);
+  const segundos = totalSegundos % 60;
+  return `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`;
+};
+
+const hmsParaMilissegundos = (valor: string): number => {
+  if (!valor) return 0;
+  const [horas = 0, minutos = 0, segundos = 0] = valor.split(":").map(Number);
+  return (horas * 3600 + minutos * 60 + segundos) * 1000;
 };
 
 const audioPlayer = ref<HTMLAudioElement | null>(null);

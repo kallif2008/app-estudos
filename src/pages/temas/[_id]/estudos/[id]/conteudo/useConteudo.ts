@@ -18,9 +18,9 @@ const queryParams = ref({
   tradutor: false,
 });
 const conteudo = ref<{
-  frase: string | null;
-  inicioAudio: number;
-  fimAudio: number;
+  frase?: string | null;
+  inicioAudio: number | string;
+  fimAudio: number | string;
   audio: File | null;
   traducao?: string | null;
   videoUrl: string | null;
@@ -32,6 +32,8 @@ const conteudo = ref<{
   traducao: null,
   videoUrl: null,
 });
+
+const showLoading = ref(false);
 const audioUrl = ref<string | null>(null);
 const audioLoading = ref(false);
 const abrirModalEditarAudio = ref(false);
@@ -62,7 +64,7 @@ const iniciarDigitacaoIA = (texto: string, fraseId: string) => {
     if (charIndex < texto.length) {
       textoDigitacaoIA.value += texto[charIndex];
       charIndex++;
-      setTimeout(digitar, 20);
+      setTimeout(digitar, 10);
     } else {
       isDigitandoIA.value = false;
       respostasIA.value[fraseId] = texto;
@@ -72,37 +74,41 @@ const iniciarDigitacaoIA = (texto: string, fraseId: string) => {
   digitar();
 };
 
-function formatarRespostaIA(data: AnaliseFraseIA): string {
-  if (!data || typeof data !== "object") return data;
+function formatarRespostaIA(data: any): string {
+  if (!data) return "Sem resposta.";
 
-  let texto = `Traducao: ${data.traducao}\n\n`;
-  texto += `Uso nativo: ${data.usoNativo}\n\n`;
+  if (typeof data === "string") return data;
 
-  if (data.gramatica.length) {
-    texto += `Gramatica:\n`;
-    data.gramatica.forEach((g) => (texto += `  - ${g}\n`));
-    texto += `\n`;
-  }
+  let texto = data.titulo ? `**${data.titulo}**\n\n` : "";
 
-  if (data.exemplos.length) {
-    texto += `Exemplos:\n`;
-    data.exemplos.forEach((ex) => {
-      texto += `  - ${ex.english}\n    => ${ex.portuguese}\n`;
+  if (data.campos) {
+    Object.entries(data.campos).forEach(([chave, valor]) => {
+      if (!valor || chave === "tipo") return;
+      const titulo = chave.charAt(0).toUpperCase() + chave.slice(1);
+      texto += `**${titulo}**\n${formatarValor(valor)}\n\n`;
     });
-    texto += `\n`;
   }
 
-  if (data.observacoes.length) {
-    texto += `Observacoes:\n`;
-    data.observacoes.forEach((o) => (texto += `  - ${o}\n`));
-  }
+  return texto.trim() || JSON.stringify(data, null, 2);
+}
 
-  return texto;
+function formatarValor(valor: any): string {
+  if (Array.isArray(valor)) {
+    return valor
+      .map(
+        (item) => `• ${typeof item === "string" ? item : JSON.stringify(item)}`,
+      )
+      .join("\n");
+  }
+  if (typeof valor === "object") {
+    return "```json\n" + JSON.stringify(valor, null, 2) + "\n```";
+  }
+  return String(valor);
 }
 
 const setarInfoParaEditarConteudo = (item: IFrases) => {
   idConteudoAtual.value = item._id;
-  conteudo.value.frase = item.frase;
+  conteudo.value.frase = item.frase || item.textoCompleto;
   conteudo.value.inicioAudio = item.inicioAudio;
   conteudo.value.fimAudio = item.fimAudio;
   conteudo.value.traducao = item.traducao || "";
@@ -127,23 +133,20 @@ const obterConteudo = async (obterFrases: () => Promise<IRespostaFrases>) => {
 
 const criarConteudo = async (
   criarFrase: () => Promise<AxiosResponse>,
-  obterFrases?: () => Promise<IRespostaFrases>,
+  obterStatus: () => Promise<null | undefined>,
 ) => {
   try {
     ativarLoading();
 
-    await criarFrase();
+    await Promise.all([criarFrase(), obterStatus()]);
 
-    await manipularRespostaCriacaoConteudo(true, obterFrases);
+    manipularRespostaConteudo();
   } catch (error) {
     desativarLoading();
   }
 };
 
-const manipularRespostaCriacaoConteudo = async (
-  executarCallback: boolean = false,
-  obterFrases?: () => Promise<IRespostaFrases>,
-) => {
+const manipularRespostaConteudo = () => {
   abrirModal.value = false;
 
   useRespostaApi(201);
@@ -155,10 +158,6 @@ const manipularRespostaCriacaoConteudo = async (
     audio: null,
     videoUrl: null,
   };
-
-  if (executarCallback) {
-    await obterConteudo(obterFrases!);
-  }
 
   desativarLoading();
 };
@@ -222,6 +221,16 @@ watch(fraseAtual, (novaFrase) => {
   }
 });
 
+const converterParaMilissegundos = (valor?: number | string): number => {
+  if (valor === undefined) return 0;
+
+  if (typeof valor === "string" && valor.includes(":")) {
+    const [horas = 0, minutos = 0, segundos = 0] = valor.split(":").map(Number);
+    return (horas * 3600 + minutos * 60 + segundos) * 1000;
+  }
+  return Number(valor);
+};
+
 export const useConteudo = () => {
   return {
     dataFrases,
@@ -243,6 +252,8 @@ export const useConteudo = () => {
     personalizarEstudo,
     queryParams,
     audioComIa,
+    statusEstudo,
+    showLoading,
     setarInfoParaEditarConteudo,
     formatarDialogo,
     formatarRespostaIA,
@@ -251,9 +262,9 @@ export const useConteudo = () => {
     selecionarAudio,
     obterConteudo,
     toggleModal,
-    manipularRespostaCriacaoConteudo,
+    manipularRespostaConteudo,
     proximoCard,
     cardAnterior,
-    statusEstudo,
+    converterParaMilissegundos,
   };
 };

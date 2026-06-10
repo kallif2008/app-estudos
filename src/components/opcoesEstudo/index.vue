@@ -87,7 +87,11 @@
           </button>
         </template>
       </ce-tooltip>
-      <ce-tooltip location="top" text="Deletar frase">
+      <ce-tooltip
+        location="top"
+        text="Deletar frase"
+        v-if="!fraseAtual?.textoCompleto"
+      >
         <template #activator>
           <button
             class="action-button"
@@ -97,6 +101,7 @@
           </button>
         </template>
       </ce-tooltip>
+
       <ce-tooltip
         location="top"
         text="Visualizar texto completo"
@@ -117,7 +122,7 @@
             class="action-button"
             @click="
               obterExplicacaoIA(
-                fraseAtual?.frase || '',
+                String(fraseAtual?.frase || fraseAtual?.textoCompleto),
                 queryParams.agenteIdExplicacao || queryParams.agenteId,
               )
             "

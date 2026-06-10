@@ -32,7 +32,9 @@ export const useChatIA = () => {
           papel: m.papel,
           conteudo: m.conteudo,
         })),
-        contexto: dataFrases.value.frases.map((f) => f.frase).join("\n"),
+        contexto: dataFrases.value.frases
+          .map((f) => f.frase || f.textoCompleto)
+          .join("\n"),
         idAgente: queryParams.value.agenteId,
       });
       const resposta = response.data.resposta;

@@ -33,10 +33,12 @@
     <div v-else class="relative">
       <input
         :type="type"
+        :step="type === 'time' ? 2 : 0"
         :placeholder="placeholder"
         :value="modelValue"
         @change="onChange"
         class="w-full px-4 py-2 rounded-lg border bg-[#0F172A] text-slate-100 border-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 appearance-none cursor-pointer pr-10"
+        :class="{ 'dark-icon': type === 'date' || type === 'time' }"
       />
 
       <div
@@ -54,7 +56,7 @@ import { ref, computed } from "vue";
 
 const props = withDefaults(
   defineProps<{
-    modelValue?: string | File | null;
+    modelValue?: string | File | null | number;
     label?: string;
     placeholder?: string;
     type?: string;
@@ -65,7 +67,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: string | File | null): void;
+  (e: "update:modelValue", value: string | File | null | number): void;
 }>();
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -88,3 +90,9 @@ const onChange = (event: Event) => {
   }
 };
 </script>
+
+<style scoped>
+.dark-icon::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(2);
+}
+</style>

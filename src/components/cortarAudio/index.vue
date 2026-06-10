@@ -21,19 +21,21 @@
     />
 
     <div v-if="duration" class="mt-6">
-      <CeSlider
-        variant="range"
-        :show-value="false"
-        :min-value="0"
-        :max-value="duration"
-        :step="0.1"
-        @update:model-value="onRangeChange"
-        size="large"
-      />
-
-      <div class="flex justify-between text-sm text-slate-600 mt-1">
-        <span>{{ formatTime(start) }}</span>
-        <span>{{ formatTime(end) }}</span>
+      <div class="flex items-center sm:flex-col gap-2 w-full">
+        <Input
+          type="time"
+          label="Início áudio"
+          class="!w-full"
+          :modelValue="segundosParaHMS(start)"
+          @update:model-value="(valor) => onInicioChange(String(valor))"
+        />
+        <Input
+          type="time"
+          label="Final áudio"
+          class="!w-full"
+          :modelValue="segundosParaHMS(end)"
+          @update:model-value="(valor) => onFimChange(String(valor))"
+        />
       </div>
 
       <div class="flex flex-row justify-between items-center gap-2 w-full mt-4">
@@ -71,8 +73,9 @@
 import { ref, watch } from "vue";
 import Input from "@/components/input/index.vue";
 import Button from "@/components/botao/index.vue";
-import { CeSlider } from "@comercti/vue-components";
+import { useConteudo } from "@/pages/temas/[_id]/estudos/[id]/conteudo/useConteudo";
 
+const { showLoading } = useConteudo();
 const emit = defineEmits<{
   (e: "cortado", file: File): void;
   (e: "tempo", tempos: { inicioAudio: number; fimAudio: number }): void;
@@ -136,6 +139,7 @@ const onTimeUpdate = () => {
 
 const emitirAudioCortado = async () => {
   travarBotao.value = true;
+  showLoading.value = true;
   if (props.emitirTempoCortado) {
     emit("tempo", {
       inicioAudio: start.value,
@@ -152,13 +156,30 @@ const emitirAudioCortado = async () => {
   const file = await cortarAudio(audioFile.value, start.value, end.value);
   emit("cortado", file);
   audioCortado.value = true;
+  showLoading.value = false;
 };
 
-const onRangeChange = (value: number | number[]) => {
-  if (!Array.isArray(value)) return;
+const segundosParaHMS = (s: number): string => {
+  const horas = Math.floor(s / 3600);
+  const minutos = Math.floor((s % 3600) / 60);
+  const segundos = Math.floor(s % 60);
+  return `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`;
+};
 
-  start.value = value[0] as number;
-  end.value = value[1] as number;
+const hmsParaSegundos = (valor: string): number => {
+  if (!valor) return 0;
+  const [horas = 0, minutos = 0, segundos = 0] = valor.split(":").map(Number);
+  return horas * 3600 + minutos * 60 + segundos;
+};
+
+const onInicioChange = (valor: string) => {
+  start.value = hmsParaSegundos(valor);
+  audioCortado.value = false;
+  travarBotao.value = false;
+};
+
+const onFimChange = (valor: string) => {
+  end.value = hmsParaSegundos(valor);
   audioCortado.value = false;
   travarBotao.value = false;
 };
@@ -191,12 +212,6 @@ watch(
   },
   { immediate: true },
 );
-
-function formatTime(seconds: number) {
-  const min = Math.floor(seconds / 60);
-  const sec = Math.floor(seconds % 60);
-  return `${min}:${sec.toString().padStart(2, "0")}`;
-}
 
 async function cortarAudio(
   file: File,
